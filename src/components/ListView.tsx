@@ -24,7 +24,6 @@ export default function ListView({ agents, lang }: ListViewProps) {
           <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
             <th className="p-4 font-semibold">{t[lang].agentName}</th>
             <th className="p-4 font-semibold">{t[lang].status}</th>
-            <th className="p-4 font-semibold">{t[lang].role}</th>
             <th className="p-4 font-semibold">{t[lang].greeting}</th>
             <th className="p-4 font-semibold">{t[lang].lastActive}</th>
           </tr>
@@ -46,7 +45,6 @@ export default function ListView({ agents, lang }: ListViewProps) {
                     {isOnline ? `🟢 ${t[lang].online}` : `⚪ ${t[lang].offline}`}
                   </span>
                 </td>
-                <td className="p-4 text-sm text-gray-600">{agent.role[lang]}</td>
                 <td className="p-4 text-sm text-gray-600 italic">"{agent.greeting[lang]}"</td>
                 <td className="p-4 text-sm text-gray-600">{agent.lastActive[lang]}</td>
               </tr>

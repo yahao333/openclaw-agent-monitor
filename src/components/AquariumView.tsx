@@ -175,9 +175,8 @@ function FishAgent({ agent, lang }: { agent: Agent; lang: Language }) {
         )}
       </div>
 
-      {/* Agent 名称和角色 */}
+      {/* Agent 名称 */}
       <span className="font-bold text-sm whitespace-nowrap">{agent.name[lang]}</span>
-      <span className="text-xs opacity-80 whitespace-nowrap">{agent.role[lang]}</span>
     </motion.div>
   );
 }

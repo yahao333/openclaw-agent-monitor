@@ -46,10 +46,9 @@ export default function GridView({ agents, lang }: GridViewProps) {
               </span>
             </div>
 
-            {/* 中间：名称和角色 */}
+            {/* 中间：名称 */}
             <div className="mb-4">
               <h3 className="text-lg font-bold text-gray-900">{agent.name[lang]}</h3>
-              <p className="text-sm text-gray-500 font-medium">{agent.role[lang]}</p>
             </div>
 
             {/* 底部：详细信息（问候语和最后活跃时间） */}
