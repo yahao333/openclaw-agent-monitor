@@ -404,20 +404,19 @@ export default function App() {
               href="https://github.com/yahao333/openclaw-status-monitor"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+              className="hover:text-gray-600 transition-colors"
+              title="GitHub"
             >
-              <Github size={14} />
-              <span>github.com/yahao333/openclaw-status-monitor</span>
+              <Github size={16} />
             </a>
-            <span className="text-gray-300">·</span>
             <a
               href="https://x.com/pai12468"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+              className="hover:text-gray-600 transition-colors"
+              title="X @pai12468"
             >
-              <MessageCircle size={14} />
-              <span>X @pai12468</span>
+              <MessageCircle size={16} />
             </a>
           </div>
         </footer>
