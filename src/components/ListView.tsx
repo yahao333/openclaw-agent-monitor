@@ -10,12 +10,20 @@ import { Language, t } from '../i18n';
 interface ListViewProps {
   agents: Agent[];
   lang: Language;
+  searchQuery?: string;
 }
 
-export default function ListView({ agents, lang }: ListViewProps) {
+export default function ListView({ agents, lang, searchQuery = '' }: ListViewProps) {
   useEffect(() => {
     console.log('[调试信息] 📝 列表视图已挂载');
   }, []);
+
+  const isMatched = (agent: Agent) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return agent.name.en.toLowerCase().includes(query) ||
+           agent.name.zh.includes(query);
+  };
 
   return (
     <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
@@ -31,11 +39,19 @@ export default function ListView({ agents, lang }: ListViewProps) {
         <tbody className="divide-y divide-gray-100">
           {agents.map((agent) => {
             const isOnline = agent.status === 'online';
-            
+            const matched = isMatched(agent);
+
             return (
-              <tr key={agent.id} className="hover:bg-gray-50 transition-colors">
+              <tr
+                key={agent.id}
+                className={`hover:bg-gray-50 transition-colors ${!matched ? 'opacity-40' : ''} ${
+                  matched && searchQuery.trim() ? 'bg-blue-50' : ''
+                }`}
+              >
                 <td className="p-4">
-                  <div className="font-medium text-gray-900">{agent.name[lang]}</div>
+                  <div className={`font-medium ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
+                    {agent.name[lang]}
+                  </div>
                   <div className="text-xs text-gray-400">{agent.id}</div>
                 </td>
                 <td className="p-4">

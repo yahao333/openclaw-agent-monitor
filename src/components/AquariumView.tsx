@@ -13,9 +13,10 @@ interface AquariumViewProps {
   agents: Agent[];
   lang: Language;
   showBubbles: boolean; // 新增：是否显示水泡的控制开关
+  searchQuery?: string;
 }
 
-export default function AquariumView({ agents, lang, showBubbles }: AquariumViewProps) {
+export default function AquariumView({ agents, lang, showBubbles, searchQuery = '' }: AquariumViewProps) {
   // 调试信息：当组件渲染时，在控制台打印日志
   useEffect(() => {
     console.log(`[调试信息] 🌊 水族箱视图已挂载，当前接收到的 Agent 数量: ${agents.length}，是否显示水泡: ${showBubbles}`);
@@ -29,9 +30,9 @@ export default function AquariumView({ agents, lang, showBubbles }: AquariumView
       {/* 渲染水族箱的背景装饰：动态水泡 (根据 showBubbles 状态决定是否渲染) */}
       {showBubbles && <Bubbles />}
 
-      {/* 遍历所有的 Agent，为每个 Agent 渲染一个“鱼” */}
+      {/* 遍历所有的 Agent，为每个 Agent 渲染一个"鱼" */}
       {agents.map((agent) => (
-        <FishAgent key={agent.id} agent={agent} lang={lang} />
+        <FishAgent key={agent.id} agent={agent} lang={lang} searchQuery={searchQuery} />
       ))}
       
       {/* 左下角的状态提示 */}
@@ -45,16 +46,26 @@ export default function AquariumView({ agents, lang, showBubbles }: AquariumView
 }
 
 /**
- * 内部组件：代表水族箱里的一条“鱼”（即一个 Agent）
+ * 内部组件：代表水族箱里的一条"鱼"（即一个 Agent）
  */
-function FishAgent({ agent, lang }: { agent: Agent; lang: Language }) {
+function FishAgent({ agent, lang, searchQuery = '' }: { agent: Agent; lang: Language; searchQuery?: string }) {
   const isOnline = agent.status === 'online';
+
+  // 检查是否匹配搜索
+  const isMatched = () => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return agent.name.en.toLowerCase().includes(query) ||
+           agent.name.zh.includes(query);
+  };
+
+  const matched = isMatched();
   
   // 辅助函数：生成安全的随机百分比坐标 (限制在 10% 到 85% 之间，防止跑出边界)
   const getRandomLeft = () => Math.floor(Math.random() * 75) + 10;
   const getRandomTop = () => Math.floor(Math.random() * 70) + 10;
 
-  // 状态：记录当前生物是否正在“避难”
+  // 状态：记录当前生物是否正在"避难"
   const [isEvading, setIsEvading] = useState(false);
   
   // 状态：记录当前的百分比坐标 (使用惰性初始化，保证初始位置随机且不越界)
@@ -132,9 +143,15 @@ function FishAgent({ agent, lang }: { agent: Agent; lang: Language }) {
     <motion.div
       onClick={handleEvade}
       className={`absolute flex flex-col items-center justify-center p-3 rounded-2xl backdrop-blur-md shadow-lg transition-colors duration-500 ${
-        isOnline 
-          ? 'bg-white/20 border border-white/40 text-white cursor-pointer hover:bg-white/30' 
-          : 'bg-gray-800/60 border border-gray-600/50 text-gray-400 grayscale cursor-not-allowed'
+        isOnline
+          ? matched
+            ? searchQuery.trim()
+              ? 'bg-white/40 border-2 border-yellow-400 text-white cursor-pointer hover:bg-white/50 ring-2 ring-yellow-300'
+              : 'bg-white/20 border border-white/40 text-white cursor-pointer hover:bg-white/30'
+            : 'bg-white/10 border border-white/20 text-white/50 cursor-pointer'
+          : matched
+            ? 'bg-gray-800/60 border border-gray-600/50 text-gray-400 cursor-not-allowed ring-1 ring-gray-500'
+            : 'bg-gray-800/30 border border-gray-600/30 text-gray-500 grayscale cursor-not-allowed'
       }`}
       style={{
         transform: 'translate(-50%, -50%)' // 确保中心点对齐坐标
@@ -149,7 +166,7 @@ function FishAgent({ agent, lang }: { agent: Agent; lang: Language }) {
       // 传入过渡配置
       transition={currentTransition}
       // 添加悬停效果，方便用户交互
-      whileHover={isOnline && !isEvading ? { scale: 1.1, zIndex: 10 } : {}}
+      whileHover={isOnline && !isEvading && matched ? { scale: 1.1, zIndex: 10 } : {}}
     >
       {/* 状态图标 */}
       <div className="relative mb-2">

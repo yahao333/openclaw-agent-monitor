@@ -10,7 +10,7 @@ import { Agent } from './types';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw, Github } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw, Github, Search } from 'lucide-react';
 import { Language, t } from './i18n';
 import {
   useUser,
@@ -34,6 +34,9 @@ export default function App() {
 
   // 状态管理：控制是否显示水族箱的水泡，默认开启
   const [showBubbles, setShowBubbles] = useState(true);
+
+  // 状态管理：搜索查询
+  const [searchQuery, setSearchQuery] = useState('');
 
   // 状态管理：Token 字段
   const [agentToken, setAgentToken] = useState('');
@@ -379,6 +382,26 @@ export default function App() {
               {t[lang].langToggle}
             </button>
 
+            {/* 搜索框 */}
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search agents..."
+                className="pl-9 pr-4 py-2 w-48 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
             {/* 设置按钮 */}
             <button
               onClick={() => setIsSettingsOpen(true)}
@@ -392,9 +415,9 @@ export default function App() {
 
         {/* 主体内容区域：根据 viewMode 状态渲染不同的组件 */}
         <main className="transition-all duration-300 ease-in-out">
-          {viewMode === 'aquarium' && <AquariumView agents={agents} lang={lang} showBubbles={showBubbles} />}
-          {viewMode === 'grid' && <GridView agents={agents} lang={lang} />}
-          {viewMode === 'list' && <ListView agents={agents} lang={lang} />}
+          {viewMode === 'aquarium' && <AquariumView agents={agents} lang={lang} showBubbles={showBubbles} searchQuery={searchQuery} />}
+          {viewMode === 'grid' && <GridView agents={agents} lang={lang} searchQuery={searchQuery} />}
+          {viewMode === 'list' && <ListView agents={agents} lang={lang} searchQuery={searchQuery} />}
         </main>
 
         {/* 底部提示信息 */}

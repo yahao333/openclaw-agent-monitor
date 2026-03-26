@@ -11,23 +11,34 @@ import { Language, t } from '../i18n';
 interface GridViewProps {
   agents: Agent[];
   lang: Language;
+  searchQuery?: string;
 }
 
-export default function GridView({ agents, lang }: GridViewProps) {
+export default function GridView({ agents, lang, searchQuery = '' }: GridViewProps) {
   useEffect(() => {
     console.log('[调试信息] 📱 网格视图已挂载');
   }, []);
+
+  const isMatched = (agent: Agent) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return agent.name.en.toLowerCase().includes(query) ||
+           agent.name.zh.includes(query);
+  };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
       {agents.map((agent) => {
         const isOnline = agent.status === 'online';
-        
+        const matched = isMatched(agent);
+
         return (
-          <div 
-            key={agent.id} 
+          <div
+            key={agent.id}
             className={`relative overflow-hidden rounded-xl border p-6 shadow-sm transition-all hover:shadow-md ${
               isOnline ? 'bg-white border-green-100' : 'bg-gray-50 border-gray-200'
+            } ${!matched ? 'opacity-40 grayscale' : ''} ${
+              matched && searchQuery.trim() ? 'ring-2 ring-blue-400 ring-offset-2' : ''
             }`}
           >
             {/* 顶部：图标和状态徽章 */}
@@ -48,7 +59,9 @@ export default function GridView({ agents, lang }: GridViewProps) {
 
             {/* 中间：名称 */}
             <div className="mb-4">
-              <h3 className="text-lg font-bold text-gray-900">{agent.name[lang]}</h3>
+              <h3 className={`text-lg font-bold ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
+                {agent.name[lang]}
+              </h3>
             </div>
 
             {/* 底部：详细信息（问候语和最后活跃时间） */}
