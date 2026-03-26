@@ -319,96 +319,96 @@ export default function App() {
       <div className="max-w-7xl mx-auto space-y-6">
         
         {/* 顶部导航栏和统计信息 */}
-        <header className="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-          
+        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 gap-4">
+
           {/* 左侧：标题和统计 */}
-          <div className="flex items-center gap-6 mb-4 md:mb-0">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
             <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
                 <Activity className="text-blue-600" />
                 {t[lang].title}
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">
                 {t[lang].subtitle}
               </p>
             </div>
-            
-            {/* 状态统计小药丸 */}
-            <div className="hidden sm:flex items-center gap-3 border-l pl-6">
+
+            {/* 状态统计小药丸 - 移动端横屏滚动 */}
+            <div className="flex items-center gap-3 border-l pl-4 ml-auto sm:ml-0">
               <div className="flex flex-col">
-                <span className="text-xs text-blue-600 uppercase font-semibold">World Total</span>
+                <span className="text-xs text-blue-600 uppercase font-semibold hidden sm:inline">World</span>
                 <span className="text-lg font-bold text-blue-700">{globalStats.total || MOCK_AGENTS.length}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 uppercase font-semibold">{t[lang].total}</span>
+                <span className="text-xs text-gray-500 uppercase font-semibold hidden sm:inline">{t[lang].total}</span>
                 <span className="text-lg font-bold">{agents.length}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-green-600 uppercase font-semibold">{t[lang].online}</span>
+                <span className="text-xs text-green-600 uppercase font-semibold hidden sm:inline">{t[lang].online}</span>
                 <span className="text-lg font-bold text-green-700">{onlineCount}</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 uppercase font-semibold">{t[lang].offline}</span>
+                <span className="text-xs text-gray-500 uppercase font-semibold hidden sm:inline">{t[lang].offline}</span>
                 <span className="text-lg font-bold text-gray-700">{offlineCount}</span>
               </div>
             </div>
           </div>
 
-          {/* 右侧：操作按钮组 */}
-          <div className="flex items-center gap-4">
+          {/* 右侧：操作按钮组 - 移动端响应式 */}
+          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0">
             {isSignedIn ? (
               <UserButton afterSignOutUrl="/" />
             ) : (
               <>
                 <SignInButton mode="modal">
-                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all cursor-pointer">
+                  <button className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all cursor-pointer whitespace-nowrap">
                     Sign In
                   </button>
                 </SignInButton>
                 <SignUpButton mode="modal">
-                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-all cursor-pointer">
+                  <button className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-all cursor-pointer whitespace-nowrap">
                     Sign Up
                   </button>
                 </SignUpButton>
               </>
             )}
 
-            {/* 语言切换按钮 */}
+            {/* 语言切换按钮 - 移动端图标+文字 */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all"
+              className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all whitespace-nowrap"
             >
-              <Globe size={18} />
-              {t[lang].langToggle}
+              <Globe size={16} />
+              <span className="hidden sm:inline">{t[lang].langToggle}</span>
             </button>
 
-            {/* 搜索框 */}
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            {/* 搜索框 - 移动端自适应 */}
+            <div className="relative flex-shrink-0">
+              <Search size={14} className="absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search agents..."
-                className="pl-9 pr-4 py-2 w-48 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Search..."
+                className="pl-8 sm:pl-9 pr-6 sm:pr-8 py-2 w-28 sm:w-40 border border-gray-200 rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               )}
             </div>
 
-            {/* 设置按钮 */}
+            {/* 设置按钮 - 移动端图标 */}
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all"
+              className="flex items-center gap-1 px-2 sm:px-3 py-2 rounded-lg text-xs sm:text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all whitespace-nowrap"
             >
-              <Settings size={18} />
-              {t[lang].settings}
+              <Settings size={16} />
+              <span className="hidden sm:inline">{t[lang].settings}</span>
             </button>
           </div>
         </header>

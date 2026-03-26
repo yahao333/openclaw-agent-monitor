@@ -35,43 +35,43 @@ export default function GridView({ agents, lang, searchQuery = '' }: GridViewPro
         return (
           <div
             key={agent.id}
-            className={`relative overflow-hidden rounded-xl border p-6 shadow-sm transition-all hover:shadow-md ${
+            className={`relative overflow-hidden rounded-xl border p-4 sm:p-6 shadow-sm transition-all hover:shadow-md ${
               isOnline ? 'bg-white border-green-100' : 'bg-gray-50 border-gray-200'
             } ${!matched ? 'opacity-40 grayscale' : ''} ${
               matched && searchQuery.trim() ? 'ring-2 ring-blue-400 ring-offset-2' : ''
             }`}
           >
             {/* 顶部：图标和状态徽章 */}
-            <div className="flex justify-between items-start mb-4">
-              <div className={`p-3 rounded-lg ${isOnline ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'}`}>
-                <Bot size={24} />
+            <div className="flex justify-between items-start mb-3 sm:mb-4">
+              <div className={`p-2 sm:p-3 rounded-lg ${isOnline ? 'bg-green-100 text-green-600' : 'bg-gray-200 text-gray-500'}`}>
+                <Bot size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
+              <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${
                 isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
               }`}>
                 {isOnline ? (
-                  <><span className="w-2 h-2 rounded-full bg-green-500"></span> {t[lang].online}</>
+                  <><span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500"></span> <span className="text-xs">{t[lang].online}</span></>
                 ) : (
-                  <><span className="w-2 h-2 rounded-full bg-gray-400"></span> {t[lang].offline}</>
+                  <><span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400"></span> <span className="text-xs">{t[lang].offline}</span></>
                 )}
               </span>
             </div>
 
             {/* 中间：名称 */}
-            <div className="mb-4">
-              <h3 className={`text-lg font-bold ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
+            <div className="mb-3 sm:mb-4">
+              <h3 className={`text-base sm:text-lg font-bold ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
                 {agent.name[lang]}
               </h3>
             </div>
 
             {/* 底部：详细信息（问候语和最后活跃时间） */}
-            <div className="space-y-2 border-t pt-4">
-              <div className="flex items-start text-sm text-gray-600">
-                <MessageCircle size={16} className="mr-2 mt-0.5 text-gray-400 shrink-0" />
+            <div className="space-y-2 border-t pt-3 sm:pt-4">
+              <div className="flex items-start text-xs sm:text-sm text-gray-600">
+                <MessageCircle size={14} className="mr-1.5 sm:mr-2 mt-0.5 text-gray-400 shrink-0" />
                 <span className="italic line-clamp-2">"{agent.greeting[lang]}"</span>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <Clock size={16} className="mr-2 text-gray-400" />
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                <Clock size={14} className="mr-1.5 sm:mr-2 text-gray-400" />
                 <span>{t[lang].lastActive}: {agent.lastActive[lang]}</span>
               </div>
             </div>

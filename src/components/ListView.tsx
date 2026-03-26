@@ -27,13 +27,13 @@ export default function ListView({ agents, lang, searchQuery = '' }: ListViewPro
 
   return (
     <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
-      <table className="w-full text-left border-collapse">
+      <table className="w-full text-left border-collapse min-w-[640px]">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-600">
-            <th className="p-4 font-semibold">{t[lang].agentName}</th>
-            <th className="p-4 font-semibold">{t[lang].status}</th>
-            <th className="p-4 font-semibold">{t[lang].greeting}</th>
-            <th className="p-4 font-semibold">{t[lang].lastActive}</th>
+          <tr className="bg-gray-50 border-b border-gray-200 text-xs sm:text-sm text-gray-600">
+            <th className="p-3 sm:p-4 font-semibold">{t[lang].agentName}</th>
+            <th className="p-3 sm:p-4 font-semibold">{t[lang].status}</th>
+            <th className="p-3 sm:p-4 font-semibold hidden sm:table-cell">{t[lang].greeting}</th>
+            <th className="p-3 sm:p-4 font-semibold">{t[lang].lastActive}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
@@ -48,21 +48,21 @@ export default function ListView({ agents, lang, searchQuery = '' }: ListViewPro
                   matched && searchQuery.trim() ? 'bg-blue-50' : ''
                 }`}
               >
-                <td className="p-4">
-                  <div className={`font-medium ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
+                <td className="p-3 sm:p-4">
+                  <div className={`font-medium text-sm sm:text-base ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
                     {agent.name[lang]}
                   </div>
-                  <div className="text-xs text-gray-400">{agent.id}</div>
+                  <div className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-none">{agent.id}</div>
                 </td>
-                <td className="p-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                <td className="p-3 sm:p-4">
+                  <span className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-xs font-medium ${
                     isOnline ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                   }`}>
                     {isOnline ? `🟢 ${t[lang].online}` : `⚪ ${t[lang].offline}`}
                   </span>
                 </td>
-                <td className="p-4 text-sm text-gray-600 italic">"{agent.greeting[lang]}"</td>
-                <td className="p-4 text-sm text-gray-600">{agent.lastActive[lang]}</td>
+                <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600 italic hidden sm:table-cell">"{agent.greeting[lang]}"</td>
+                <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600">{agent.lastActive[lang]}</td>
               </tr>
             );
           })}

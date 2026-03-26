@@ -26,7 +26,7 @@ export default function AquariumView({ agents, lang, showBubbles, searchQuery = 
   }, [agents, showBubbles]);
 
   return (
-    <div className="relative w-full h-[600px] bg-gradient-to-b from-cyan-500 to-blue-900 rounded-2xl overflow-hidden border-4 border-blue-300 shadow-2xl">
+    <div className="relative w-full h-[350px] sm:h-[450px] md:h-[600px] bg-gradient-to-b from-cyan-500 to-blue-900 rounded-2xl overflow-hidden border-2 sm:border-4 border-blue-300 shadow-2xl">
       {/* 渲染水族箱的背景装饰：动态水泡 (根据 showBubbles 状态决定是否渲染) */}
       {showBubbles && <Bubbles />}
 
@@ -34,12 +34,12 @@ export default function AquariumView({ agents, lang, showBubbles, searchQuery = 
       {agents.map((agent) => (
         <FishAgent key={agent.id} agent={agent} lang={lang} searchQuery={searchQuery} />
       ))}
-      
-      {/* 左下角的状态提示 */}
-      <div className="absolute bottom-4 left-4 bg-black/40 text-white px-4 py-2 rounded-lg backdrop-blur-md text-sm pointer-events-none z-20">
-        <p>{t[lang].swimming}</p>
-        <p>{t[lang].sleeping}</p>
-        <p className="mt-1 text-yellow-300 text-xs font-bold">{t[lang].clickToEvade}</p>
+
+      {/* 左下角的状态提示 - 移动端隐藏 */}
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 bg-black/40 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg backdrop-blur-md text-xs sm:text-sm pointer-events-none z-20">
+        <p className="hidden sm:block">{t[lang].swimming}</p>
+        <p className="hidden sm:block">{t[lang].sleeping}</p>
+        <p className="mt-0.5 sm:mt-1 text-yellow-300 text-xs font-bold">{t[lang].clickToEvade}</p>
       </div>
     </div>
   );
