@@ -8,3 +8,6 @@ coverage/
 !.env.example
 .vercel
 public/
+*.swp
+*.swo
+*~
