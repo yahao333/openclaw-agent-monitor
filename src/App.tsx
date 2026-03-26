@@ -10,7 +10,7 @@ import { Agent } from './types';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw } from 'lucide-react';
 import { Language, t } from './i18n';
 import {
   useUser,
@@ -37,6 +37,7 @@ export default function App() {
 
   // 状态管理：Token 字段
   const [agentToken, setAgentToken] = useState('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // 状态管理：Agent 数据
   const [agents, setAgents] = useState<Agent[]>(MOCK_AGENTS);
@@ -152,6 +153,12 @@ export default function App() {
       }
     };
     reader.readAsText(file);
+  };
+
+  // 重置 Token
+  const handleResetToken = () => {
+    setAgentToken('');
+    setShowResetConfirm(false);
   };
 
   // 调试信息：当视图模式改变时打印日志
@@ -354,14 +361,51 @@ export default function App() {
               {/* Token 字段 */}
               <div className="pt-6 border-t border-gray-100 space-y-2">
                 <label className="text-sm font-semibold text-gray-900">{t[lang].token}</label>
-                <input
-                  type="text"
-                  value={agentToken}
-                  onChange={(e) => setAgentToken(e.target.value)}
-                  placeholder={t[lang].tokenPlaceholder}
-                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={agentToken}
+                    onChange={(e) => setAgentToken(e.target.value)}
+                    placeholder={t[lang].tokenPlaceholder}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {agentToken && (
+                    <button
+                      onClick={() => setShowResetConfirm(true)}
+                      className="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                      title="Reset"
+                    >
+                      <RotateCcw size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* 重置确认弹窗 */}
+              {showResetConfirm && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                  <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Reset Token?</h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      This will clear your Agent Token. Any agent data linked to this token will no longer sync.
+                    </p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowResetConfirm(false)}
+                        className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleResetToken}
+                        className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 上传 Agent JSON */}
               <div className="pt-6 border-t border-gray-100 space-y-2">
