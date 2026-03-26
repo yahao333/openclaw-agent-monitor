@@ -10,7 +10,7 @@ import { Agent } from './types';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw, Github, MessageCircle } from 'lucide-react';
 import { Language, t } from './i18n';
 import {
   useUser,
@@ -399,7 +399,27 @@ export default function App() {
 
         {/* 底部提示信息 */}
         <footer className="text-center text-sm text-gray-400 mt-8">
-          <p>{t[lang].footer}</p>
+          <div className="flex items-center justify-center gap-4">
+            <a
+              href="https://github.com/yahao333/openclaw-status-monitor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+            >
+              <Github size={14} />
+              <span>github.com/yahao333/openclaw-status-monitor</span>
+            </a>
+            <span className="text-gray-300">·</span>
+            <a
+              href="https://x.com/pai12468"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 hover:text-gray-600 transition-colors"
+            >
+              <MessageCircle size={14} />
+              <span>X @pai12468</span>
+            </a>
+          </div>
         </footer>
 
       </div>
