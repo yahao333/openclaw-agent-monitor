@@ -9,6 +9,13 @@ interface AgentData {
   greeting: { en: string; zh: string };
 }
 
+interface Settings {
+  viewMode: 'aquarium' | 'grid' | 'list';
+  lang: 'en' | 'zh';
+  showBubbles: boolean;
+  token?: string;
+}
+
 // Initialize Redis client
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
@@ -19,53 +26,94 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // Allow token-based access for external agents
   const token = req.headers['x-agent-token'] as string;
   const userId = req.headers['x-user-id'] as string;
 
-  // Must have either token or userId
-  const key = token || userId;
-  if (!key) {
-    return res.status(401).json({ error: 'Unauthorized: missing token or userId' });
-  }
+  // Case 1: User logged in (has userId) - can read/write their own agents
+  if (userId) {
+    const agentsKey = `agents:${userId}`;
 
-  const agentsKey = `agents:${key}`;
-
-  if (req.method === 'GET') {
-    try {
-      const agents = await redis.get<AgentData[]>(agentsKey);
-      if (!agents) {
-        return res.status(200).json([]);
+    if (req.method === 'GET') {
+      try {
+        const agents = await redis.get<AgentData[]>(agentsKey);
+        return res.status(200).json(agents || []);
+      } catch (error) {
+        console.error('Redis GET error:', error);
+        return res.status(500).json({ error: 'Failed to fetch agents' });
       }
-      return res.status(200).json(agents);
-    } catch (error) {
-      console.error('Redis GET error:', error);
-      return res.status(500).json({ error: 'Failed to fetch agents' });
+    }
+
+    if (req.method === 'POST') {
+      try {
+        const agents = req.body as AgentData[];
+
+        if (!Array.isArray(agents)) {
+          return res.status(400).json({ error: 'Agents must be an array' });
+        }
+
+        for (const agent of agents) {
+          if (!agent.id || !agent.name || !agent.status) {
+            return res.status(400).json({ error: 'Invalid agent data: missing required fields' });
+          }
+        }
+
+        await redis.set(agentsKey, agents);
+        return res.status(200).json({ success: true, count: agents.length });
+      } catch (error) {
+        console.error('Redis POST error:', error);
+        return res.status(500).json({ error: 'Failed to save agents' });
+      }
     }
   }
 
-  if (req.method === 'POST') {
+  // Case 2: External agent upload (has token only) - must validate token against user settings
+  if (token) {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed for agent token' });
+    }
+
     try {
+      // Find the userId that has this token registered in settings
+      // Scan all settings keys to find matching token
+      // Note: In production, you might want to maintain a reverse index (token -> userId)
+      const settingsKeys = await redis.keys('settings:*');
+
+      let matchedUserId: string | null = null;
+      for (const settingsKey of settingsKeys) {
+        const settings = await redis.get<Settings>(settingsKey);
+        if (settings && settings.token === token) {
+          // Extract userId from settings key (format: "settings:{userId}")
+          matchedUserId = settingsKey.replace('settings:', '');
+          break;
+        }
+      }
+
+      if (!matchedUserId) {
+        return res.status(403).json({ error: 'Invalid token: token not found in any user settings' });
+      }
+
+      // Token is valid, process the upload
       const agents = req.body as AgentData[];
 
       if (!Array.isArray(agents)) {
         return res.status(400).json({ error: 'Agents must be an array' });
       }
 
-      // Validate each agent has required fields
       for (const agent of agents) {
         if (!agent.id || !agent.name || !agent.status) {
           return res.status(400).json({ error: 'Invalid agent data: missing required fields' });
         }
       }
 
-      await redis.set(agentsKey, JSON.stringify(agents));
-      return res.status(200).json({ success: true, count: agents.length });
+      const agentsKey = `agents:${matchedUserId}`;
+      await redis.set(agentsKey, agents);
+
+      return res.status(200).json({ success: true, count: agents.length, userId: matchedUserId });
     } catch (error) {
-      console.error('Redis POST error:', error);
-      return res.status(500).json({ error: 'Failed to save agents' });
+      console.error('Redis agent upload error:', error);
+      return res.status(500).json({ error: 'Failed to upload agents' });
     }
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  return res.status(401).json({ error: 'Unauthorized: missing token or userId' });
 }
