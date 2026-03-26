@@ -372,7 +372,7 @@ export default function App() {
                   {agentToken && (
                     <button
                       onClick={() => setShowResetConfirm(true)}
-                      className="px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="px-3 py-2 border border-gray-300 text-gray-600 hover:text-red-600 hover:border-red-300 hover:bg-red-50 rounded-lg transition-colors"
                       title="Reset"
                     >
                       <RotateCcw size={16} />
