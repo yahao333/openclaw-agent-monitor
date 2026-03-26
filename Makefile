@@ -26,7 +26,7 @@ test-agents:
 	@curl -X POST "$(URL)/api/agents" \
 		-H "Content-Type: application/json" \
 		-H "x-agent-token: $(TOKEN)" \
-		-d '[{"id":"test-001","name":{"en":"Test Agent 1","zh":"测试Agent 1"},"status":"online","lastActive":{"en":"Just now","zh":"刚刚"},"greeting":{"en":"Hello!","zh":"你好！"}},{"id":"test-002","name":{"en":"Test Agent 2","zh":"测试Agent 2"},"status":"offline","lastActive":{"en":"1 hour ago","zh":"1小时前"},"greeting":{"en":"Goodbye!","zh":"再见！"}}]' \
+		-d '[{"id":"test-001","name":{"en":"Test Agent A","zh":"测试Agent 1"},"status":"online","lastActive":{"en":"Just now","zh":"刚刚"},"greeting":{"en":"Hello!","zh":"你好！"}},{"id":"test-002","name":{"en":"Test Agent 2","zh":"测试Agent 2"},"status":"offline","lastActive":{"en":"1 hour ago","zh":"1小时前"},"greeting":{"en":"Goodbye!","zh":"再见！"}}]' \
 		-w "\nHTTP Status: %{http_code}\n"
 	@echo ""
 	@echo "Fetching agents from API..."
