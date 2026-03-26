@@ -9,15 +9,13 @@ import { MOCK_AGENTS } from './mockData';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2 } from 'lucide-react';
 import { Language, t } from './i18n';
 import {
   useUser,
   UserButton,
   SignInButton,
   SignUpButton,
-  SignIn,
-  SignUp,
 } from '@clerk/react';
 
 // 定义视图类型的联合类型，限制只能是这三个字符串之一
@@ -38,7 +36,56 @@ export default function App() {
 
   // 状态管理：Clerk 认证
   const { isSignedIn, user } = useUser();
-  const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up' | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // 加载用户设置
+  useEffect(() => {
+    if (!user || !isSignedIn) return;
+
+    const loadSettings = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch('/api/settings', {
+          headers: { 'x-user-id': user.id },
+        });
+        if (res.ok) {
+          const settings = await res.json();
+          setViewMode(settings.viewMode);
+          setLang(settings.lang);
+          setShowBubbles(settings.showBubbles);
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSettings();
+  }, [user, isSignedIn]);
+
+  // 保存设置
+  const saveSettings = async () => {
+    if (!user || !isSignedIn) return;
+
+    setIsSaving(true);
+    try {
+      await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.id,
+        },
+        body: JSON.stringify({ viewMode, lang, showBubbles }),
+      });
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+    } finally {
+      setIsSaving(false);
+      setIsSettingsOpen(false);
+    }
+  };
 
   // 调试信息：当视图模式改变时打印日志
   useEffect(() => {
@@ -239,10 +286,20 @@ export default function App() {
             </div>
             
             {/* 模态框底部 */}
-            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-end">
-              <button 
-                onClick={() => setIsSettingsOpen(false)} 
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
+            <div className="p-6 bg-gray-50 border-t border-gray-100 flex justify-between">
+              {isSignedIn && (
+                <button
+                  onClick={saveSettings}
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSaving && <Loader2 size={16} className="animate-spin" />}
+                  {isSaving ? 'Saving...' : 'Save'}
+                </button>
+              )}
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className={`px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors shadow-sm ${isSignedIn ? '' : 'w-full'}`}
               >
                 {t[lang].close}
               </button>
