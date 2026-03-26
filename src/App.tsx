@@ -9,8 +9,9 @@ import { MOCK_AGENTS } from './mockData';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, User, LogIn } from 'lucide-react';
 import { Language, t } from './i18n';
+import RegisterForm from './components/RegisterForm';
 
 // 定义视图类型的联合类型，限制只能是这三个字符串之一
 type ViewMode = 'aquarium' | 'grid' | 'list';
@@ -27,6 +28,12 @@ export default function App() {
 
   // 状态管理：控制是否显示水族箱的水泡，默认开启
   const [showBubbles, setShowBubbles] = useState(true);
+
+  // 状态管理：控制注册表单的打开/关闭
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+
+  // 状态管理：记录当前登录用户
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   // 调试信息：当视图模式改变时打印日志
   useEffect(() => {
@@ -90,6 +97,21 @@ export default function App() {
 
           {/* 右侧：操作按钮组 */}
           <div className="flex items-center gap-4">
+            {currentUser ? (
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-200">
+                <User size={18} />
+                {currentUser}
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsRegisterOpen(true)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-all"
+              >
+                <LogIn size={18} />
+                Sign Up
+              </button>
+            )}
+
             {/* 语言切换按钮 */}
             <button
               onClick={toggleLanguage}
@@ -123,6 +145,17 @@ export default function App() {
         </footer>
 
       </div>
+
+      {/* 注册表单 */}
+      {isRegisterOpen && (
+        <RegisterForm
+          onClose={() => setIsRegisterOpen(false)}
+          onSuccess={(email) => {
+            setCurrentUser(email);
+            setIsRegisterOpen(false);
+          }}
+        />
+      )}
 
       {/* 设置页面 (模态框) */}
       {isSettingsOpen && (
