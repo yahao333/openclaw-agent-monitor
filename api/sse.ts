@@ -16,7 +16,8 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  const userId = req.headers['x-user-id'] as string;
+  // EventSource doesn't support custom headers, use query parameter
+  const userId = req.query.userId as string;
 
   if (!userId) {
     return res.status(401).json({ error: 'Unauthorized' });

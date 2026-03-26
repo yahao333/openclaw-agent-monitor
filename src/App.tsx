@@ -120,9 +120,7 @@ export default function App() {
     let reconnectTimeout: NodeJS.Timeout | null = null;
 
     const connectSSE = () => {
-      eventSource = new EventSource('/api/sse', {
-        headers: { 'x-user-id': user.id }
-      } as EventSourceInit);
+      eventSource = new EventSource(`/api/sse?userId=${user.id}`);
 
       eventSource.onmessage = (event) => {
         try {
