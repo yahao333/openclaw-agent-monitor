@@ -42,6 +42,14 @@ export default function App() {
   // 状态管理：Agent 数据
   const [agents, setAgents] = useState<Agent[]>(MOCK_AGENTS);
 
+  // 状态管理：全局 Agent 统计（来自 cron 定时任务）
+  const [globalStats, setGlobalStats] = useState<{ total: number; online: number; offline: number; updatedAt: string | null }>({
+    total: 0,
+    online: 0,
+    offline: 0,
+    updatedAt: null
+  });
+
   // 状态管理：Clerk 认证
   const { isSignedIn, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
@@ -236,6 +244,26 @@ export default function App() {
     console.log(`[调试信息] 🫧 ${t[lang].debugToggleBubbles} ${showBubbles}`);
   }, [showBubbles, lang]);
 
+  // 获取全局 Agent 统计（来自 cron 定时任务）
+  useEffect(() => {
+    const fetchGlobalStats = async () => {
+      try {
+        const res = await fetch('/api/stats');
+        if (res.ok) {
+          const stats = await res.json();
+          setGlobalStats(stats);
+        }
+      } catch (err) {
+        console.error('[globalStats] Failed to fetch:', err);
+      }
+    };
+
+    fetchGlobalStats();
+    // 每 5 分钟刷新一次统计
+    const interval = setInterval(fetchGlobalStats, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   // 切换语言的函数
   const toggleLanguage = () => {
     setLang(prev => prev === 'en' ? 'zh' : 'en');
@@ -267,8 +295,12 @@ export default function App() {
             {/* 状态统计小药丸 */}
             <div className="hidden sm:flex items-center gap-3 border-l pl-6">
               <div className="flex flex-col">
+                <span className="text-xs text-blue-600 uppercase font-semibold">World Total</span>
+                <span className="text-lg font-bold text-blue-700">{globalStats.total || MOCK_AGENTS.length}</span>
+              </div>
+              <div className="flex flex-col">
                 <span className="text-xs text-gray-500 uppercase font-semibold">{t[lang].total}</span>
-                <span className="text-lg font-bold">{MOCK_AGENTS.length}</span>
+                <span className="text-lg font-bold">{agents.length}</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-xs text-green-600 uppercase font-semibold">{t[lang].online}</span>
