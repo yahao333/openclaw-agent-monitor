@@ -10,7 +10,7 @@ import { Agent } from './types';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw, Github, MessageCircle } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload, RotateCcw, Github } from 'lucide-react';
 import { Language, t } from './i18n';
 import {
   useUser,
@@ -416,7 +416,7 @@ export default function App() {
               className="hover:text-gray-600 transition-colors"
               title="X @pai12468"
             >
-              <MessageCircle size={16} />
+              <X size={16} />
             </a>
           </div>
         </footer>
