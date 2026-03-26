@@ -153,7 +153,50 @@ export default function App() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    processFile(file);
+  };
 
+  // 处理拖拽上传
+  const [isDragging, setIsDragging] = useState(false);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set isDragging to false if leaving the drop zone entirely
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type === 'application/json' || file.name.endsWith('.json')) {
+        processFile(file);
+      } else {
+        alert('Please upload a JSON file');
+      }
+    }
+  };
+
+  const processFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
@@ -442,13 +485,27 @@ export default function App() {
                   accept=".json"
                   className="hidden"
                 />
-                <button
+                <div
+                  ref={dropZoneRef}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-200 border-dashed rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                  className={`relative flex flex-col items-center justify-center gap-2 w-full px-4 py-6 border-2 border-dashed rounded-lg text-sm cursor-pointer transition-all ${
+                    isDragging
+                      ? 'border-blue-400 bg-blue-50 text-blue-600'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'
+                  }`}
                 >
-                  <Upload size={16} />
-                  {t[lang].uploadAgents}
-                </button>
+                  <Upload size={24} className={isDragging ? 'text-blue-500' : 'text-gray-400'} />
+                  <span className={`font-medium ${isDragging ? 'text-blue-600' : 'text-gray-600'}`}>
+                    {isDragging ? 'Drop file here' : t[lang].uploadAgents}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {isDragging ? 'Release to upload' : 'Drag & drop or click to browse'}
+                  </span>
+                </div>
                 <p className="text-xs text-gray-400">
                   {agents.length} agents loaded
                 </p>
