@@ -369,13 +369,21 @@ export default function App() {
                     placeholder={t[lang].tokenPlaceholder}
                     className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  {agentToken && (
+                  {agentToken ? (
                     <button
                       onClick={() => setShowResetConfirm(true)}
                       className="px-3 py-2 border border-gray-300 text-gray-600 hover:text-red-600 hover:border-red-300 hover:bg-red-50 rounded-lg transition-colors"
                       title="Reset"
                     >
                       <RotateCcw size={16} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setAgentToken(crypto.randomUUID())}
+                      className="px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                      title="Generate"
+                    >
+                      Generate
                     </button>
                   )}
                 </div>
