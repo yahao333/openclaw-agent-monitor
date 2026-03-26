@@ -4,12 +4,13 @@
  * 对于小白来说：这里是整个网页的“总指挥部”，它决定了当前屏幕上显示的是水族箱、网格还是列表。
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MOCK_AGENTS } from './mockData';
+import { Agent } from './types';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2 } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, Loader2, Upload } from 'lucide-react';
 import { Language, t } from './i18n';
 import {
   useUser,
@@ -34,10 +35,17 @@ export default function App() {
   // 状态管理：控制是否显示水族箱的水泡，默认开启
   const [showBubbles, setShowBubbles] = useState(true);
 
+  // 状态管理：Token 字段
+  const [agentToken, setAgentToken] = useState('');
+
+  // 状态管理：Agent 数据
+  const [agents, setAgents] = useState<Agent[]>(MOCK_AGENTS);
+
   // 状态管理：Clerk 认证
   const { isSignedIn, user } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 加载用户设置
   useEffect(() => {
@@ -51,9 +59,10 @@ export default function App() {
         });
         if (res.ok) {
           const settings = await res.json();
-          setViewMode(settings.viewMode);
-          setLang(settings.lang);
-          setShowBubbles(settings.showBubbles);
+          setViewMode(settings.viewMode || 'aquarium');
+          setLang(settings.lang || 'en');
+          setShowBubbles(settings.showBubbles !== false);
+          setAgentToken(settings.token || '');
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
@@ -63,6 +72,29 @@ export default function App() {
     };
 
     loadSettings();
+  }, [user, isSignedIn]);
+
+  // 加载 Agent 数据
+  useEffect(() => {
+    if (!user || !isSignedIn) return;
+
+    const loadAgents = async () => {
+      try {
+        const res = await fetch('/api/agents', {
+          headers: { 'x-user-id': user.id },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setAgents(data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load agents:', err);
+      }
+    };
+
+    loadAgents();
   }, [user, isSignedIn]);
 
   // 保存设置
@@ -77,14 +109,49 @@ export default function App() {
           'Content-Type': 'application/json',
           'x-user-id': user.id,
         },
-        body: JSON.stringify({ viewMode, lang, showBubbles }),
+        body: JSON.stringify({ viewMode, lang, showBubbles, token: agentToken }),
       });
+
+      // Save agents to Redis if token is set
+      if (agentToken) {
+        await fetch('/api/agents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-agent-token': agentToken,
+          },
+          body: JSON.stringify(agents),
+        });
+      }
     } catch (err) {
       console.error('Failed to save settings:', err);
     } finally {
       setIsSaving(false);
       setIsSettingsOpen(false);
     }
+  };
+
+  // 处理文件上传
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = event.target?.result as string;
+        const parsed = JSON.parse(json);
+
+        if (Array.isArray(parsed)) {
+          setAgents(parsed);
+        } else {
+          alert('Invalid format: expected an array of agents');
+        }
+      } catch {
+        alert('Failed to parse JSON file');
+      }
+    };
+    reader.readAsText(file);
   };
 
   // 调试信息：当视图模式改变时打印日志
@@ -108,8 +175,8 @@ export default function App() {
   };
 
   // 计算在线和离线的数量，用于在顶部展示统计信息
-  const onlineCount = MOCK_AGENTS.filter(a => a.status === 'online').length;
-  const offlineCount = MOCK_AGENTS.length - onlineCount;
+  const onlineCount = agents.filter(a => a.status === 'online').length;
+  const offlineCount = agents.length - onlineCount;
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 font-sans p-6">
@@ -188,9 +255,9 @@ export default function App() {
 
         {/* 主体内容区域：根据 viewMode 状态渲染不同的组件 */}
         <main className="transition-all duration-300 ease-in-out">
-          {viewMode === 'aquarium' && <AquariumView agents={MOCK_AGENTS} lang={lang} showBubbles={showBubbles} />}
-          {viewMode === 'grid' && <GridView agents={MOCK_AGENTS} lang={lang} />}
-          {viewMode === 'list' && <ListView agents={MOCK_AGENTS} lang={lang} />}
+          {viewMode === 'aquarium' && <AquariumView agents={agents} lang={lang} showBubbles={showBubbles} />}
+          {viewMode === 'grid' && <GridView agents={agents} lang={lang} />}
+          {viewMode === 'list' && <ListView agents={agents} lang={lang} />}
         </main>
 
         {/* 底部提示信息 */}
@@ -282,6 +349,40 @@ export default function App() {
                     }`}
                   />
                 </button>
+              </div>
+
+              {/* Token 字段 */}
+              <div className="pt-6 border-t border-gray-100 space-y-2">
+                <label className="text-sm font-semibold text-gray-900">{t[lang].token}</label>
+                <input
+                  type="text"
+                  value={agentToken}
+                  onChange={(e) => setAgentToken(e.target.value)}
+                  placeholder={t[lang].tokenPlaceholder}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* 上传 Agent JSON */}
+              <div className="pt-6 border-t border-gray-100 space-y-2">
+                <label className="text-sm font-semibold text-gray-900">{t[lang].uploadAgents}</label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept=".json"
+                  className="hidden"
+                />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-gray-200 border-dashed rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                >
+                  <Upload size={16} />
+                  {t[lang].uploadAgents}
+                </button>
+                <p className="text-xs text-gray-400">
+                  {agents.length} agents loaded
+                </p>
               </div>
             </div>
             

@@ -4,6 +4,7 @@ interface Settings {
   viewMode: 'aquarium' | 'grid' | 'list';
   lang: 'en' | 'zh';
   showBubbles: boolean;
+  token?: string;
 }
 
 // In-memory store for demo (use Redis/DB in production)
@@ -24,6 +25,7 @@ export default async function handler(
       viewMode: 'aquarium',
       lang: 'en',
       showBubbles: true,
+      token: '',
     };
     return res.status(200).json(settings);
   }
