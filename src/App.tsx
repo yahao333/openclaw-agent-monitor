@@ -9,9 +9,16 @@ import { MOCK_AGENTS } from './mockData';
 import AquariumView from './components/AquariumView';
 import GridView from './components/GridView';
 import ListView from './components/ListView';
-import { LayoutGrid, List, Fish, Activity, Globe, Settings, X, User, LogIn } from 'lucide-react';
+import { LayoutGrid, List, Fish, Activity, Globe, Settings, X } from 'lucide-react';
 import { Language, t } from './i18n';
-import { useUser, UserButton, SignIn, SignUp } from '@clerk/react';
+import {
+  useUser,
+  UserButton,
+  SignInButton,
+  SignUpButton,
+  SignIn,
+  SignUp,
+} from '@clerk/react';
 
 // 定义视图类型的联合类型，限制只能是这三个字符串之一
 type ViewMode = 'aquarium' | 'grid' | 'list';
@@ -31,8 +38,7 @@ export default function App() {
 
   // 状态管理：Clerk 认证
   const { isSignedIn, user } = useUser();
-  const [showSignIn, setShowSignIn] = useState(false);
-  const [showSignUp, setShowSignUp] = useState(false);
+  const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up' | null>(null);
 
   // 调试信息：当视图模式改变时打印日志
   useEffect(() => {
@@ -100,20 +106,16 @@ export default function App() {
               <UserButton afterSignOutUrl="/" />
             ) : (
               <>
-                <button
-                  onClick={() => setShowSignIn(true)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all"
-                >
-                  <LogIn size={18} />
-                  Sign In
-                </button>
-                <button
-                  onClick={() => setShowSignUp(true)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-all"
-                >
-                  <User size={18} />
-                  Sign Up
-                </button>
+                <SignInButton mode="modal">
+                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 border border-gray-200 transition-all cursor-pointer">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-all cursor-pointer">
+                    Sign Up
+                  </button>
+                </SignUpButton>
               </>
             )}
 
@@ -150,50 +152,6 @@ export default function App() {
         </footer>
 
       </div>
-
-      {/* Clerk 注册模态框 */}
-      {showSignUp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="flex justify-end p-4">
-              <button
-                onClick={() => setShowSignUp(false)}
-                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-lg transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <SignUp
-              routing="virtual"
-              signInUrl="/?sign-in=true"
-              afterSignUpUrl="/"
-              modal
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Clerk 登录模态框 */}
-      {showSignIn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-            <div className="flex justify-end p-4">
-              <button
-                onClick={() => setShowSignIn(false)}
-                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-1 rounded-lg transition-colors"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <SignIn
-              routing="virtual"
-              signUpUrl="/?sign-up=true"
-              afterSignInUrl="/"
-              modal
-            />
-          </div>
-        </div>
-      )}
 
       {/* 设置页面 (模态框) */}
       {isSettingsOpen && (
