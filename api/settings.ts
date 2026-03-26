@@ -42,7 +42,7 @@ export default async function handler(
       return res.status(200).json(settings);
     } catch (error) {
       console.error('Redis GET error:', error);
-      return res.status(500).json({ error: 'Failed to load settings' });
+      return res.status(500).json({ error: 'Failed to load settings', details: String(error) });
     }
   }
 
@@ -54,7 +54,8 @@ export default async function handler(
         return res.status(400).json({ error: 'Invalid settings' });
       }
 
-      await redis.set(settingsKey, JSON.stringify(settings));
+      // Upstash Redis auto-parses JSON, so store object directly (not JSON.stringify)
+      await redis.set(settingsKey, settings);
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error('Redis POST error:', error);

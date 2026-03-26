@@ -55,18 +55,24 @@ export default function App() {
     const loadSettings = async () => {
       setIsLoading(true);
       try {
+        console.log('[loadSettings] Fetching settings for user:', user.id);
         const res = await fetch('/api/settings', {
           headers: { 'x-user-id': user.id },
         });
+        console.log('[loadSettings] Response status:', res.status);
         if (res.ok) {
           const settings = await res.json();
+          console.log('[loadSettings] Settings loaded:', settings);
+          console.log('[loadSettings] Token from settings:', settings.token);
           setViewMode(settings.viewMode || 'aquarium');
           setLang(settings.lang || 'en');
           setShowBubbles(settings.showBubbles !== false);
           setAgentToken(settings.token || '');
+        } else {
+          console.error('[loadSettings] Failed to load settings:', res.status);
         }
       } catch (err) {
-        console.error('Failed to load settings:', err);
+        console.error('[loadSettings] Error:', err);
       } finally {
         setIsLoading(false);
       }
@@ -104,15 +110,26 @@ export default function App() {
 
     setIsSaving(true);
     try {
-      await fetch('/api/settings', {
+      const payload = { viewMode, lang, showBubbles, token: agentToken };
+      console.log('[saveSettings] Saving settings for user:', user.id, payload);
+      const res = await fetch('/api/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-user-id': user.id,
         },
-        body: JSON.stringify({ viewMode, lang, showBubbles, token: agentToken }),
+        body: JSON.stringify(payload),
       });
 
+      console.log('[saveSettings] Response status:', res.status);
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        console.error('[saveSettings] Save failed:', res.status, errData);
+        alert('Failed to save settings: ' + (errData.error || res.statusText));
+        return;
+      }
+
+      console.log('[saveSettings] Settings saved successfully!');
       // Save agents to Redis if token is set
       if (agentToken) {
         await fetch('/api/agents', {
