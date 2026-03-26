@@ -1,0 +1,5 @@
+{
+  "name": "OpenClaw Agent Monitor",
+  "description": "A web application to monitor the online/offline status of OpenClaw agents, featuring a game-like aquarium view.",
+  "requestFramePermissions": []
+}
