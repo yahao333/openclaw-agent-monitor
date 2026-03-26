@@ -1,7 +1,7 @@
 [
   {
     "id": "claw-001",
-    "name": { "en": "Alpha Scraper", "zh": "Alpha 抓取者" },
+    "name": { "en": "AAA", "zh": "AAA" },
     "status": "online",
     "lastActive": { "en": "Just now", "zh": "刚刚" },
     "greeting": { "en": "Hello world, I am ready to scrape!", "zh": "你好世界，我准备好抓取了！" }
