@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Redis } from '@upstash/redis';
 
 interface Settings {
   viewMode: 'aquarium' | 'grid' | 'list';
@@ -7,8 +8,18 @@ interface Settings {
   token?: string;
 }
 
-// In-memory store for demo (use Redis/DB in production)
-const settingsStore = new Map<string, Settings>();
+// Initialize Redis client
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const DEFAULT_SETTINGS: Settings = {
+  viewMode: 'aquarium',
+  lang: 'en',
+  showBubbles: true,
+  token: '',
+};
 
 export default async function handler(
   req: VercelRequest,
@@ -20,25 +31,35 @@ export default async function handler(
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
+  const settingsKey = `settings:${userId}`;
+
   if (req.method === 'GET') {
-    const settings = settingsStore.get(userId) || {
-      viewMode: 'aquarium',
-      lang: 'en',
-      showBubbles: true,
-      token: '',
-    };
-    return res.status(200).json(settings);
+    try {
+      const settings = await redis.get<Settings>(settingsKey);
+      if (!settings) {
+        return res.status(200).json(DEFAULT_SETTINGS);
+      }
+      return res.status(200).json(settings);
+    } catch (error) {
+      console.error('Redis GET error:', error);
+      return res.status(500).json({ error: 'Failed to load settings' });
+    }
   }
 
   if (req.method === 'POST') {
-    const settings = req.body as Settings;
+    try {
+      const settings = req.body as Settings;
 
-    if (!settings || typeof settings.viewMode !== 'string' || typeof settings.showBubbles !== 'boolean') {
-      return res.status(400).json({ error: 'Invalid settings' });
+      if (!settings || typeof settings.viewMode !== 'string' || typeof settings.showBubbles !== 'boolean') {
+        return res.status(400).json({ error: 'Invalid settings' });
+      }
+
+      await redis.set(settingsKey, JSON.stringify(settings));
+      return res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('Redis POST error:', error);
+      return res.status(500).json({ error: 'Failed to save settings' });
     }
-
-    settingsStore.set(userId, settings);
-    return res.status(200).json({ success: true });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
