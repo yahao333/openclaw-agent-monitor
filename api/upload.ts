@@ -22,6 +22,9 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+// TTL in seconds, default 24 hours
+const REDIS_TTL = parseInt(process.env.REDIS_TTL_SECONDS || '86400', 10);
+
 /**
  * External upload endpoint for agents to upload JSON data.
  * Validates token against user settings before allowing upload.
@@ -103,14 +106,24 @@ export default async function handler(
       }
     }
 
-    // Save agents to the matched user's storage
+    // Save agents to the matched user's storage with TTL
     const agentsKey = `agents:${matchedUserId}`;
-    await redis.set(agentsKey, agents);
+    await redis.set(agentsKey, agents, { ex: REDIS_TTL });
+
+    // Set update timestamp for SSE polling
+    const updateKey = `update:${matchedUserId}`;
+    await redis.set(updateKey, {
+      action: 'agents_updated',
+      userId: matchedUserId,
+      count: agents.length,
+      timestamp: Date.now()
+    }, { ex: REDIS_TTL });
 
     return res.status(200).json({
       success: true,
       count: agents.length,
-      message: `Successfully uploaded ${agents.length} agents`
+      message: `Successfully uploaded ${agents.length} agents`,
+      ttl: REDIS_TTL
     });
 
   } catch (error) {

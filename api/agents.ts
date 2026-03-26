@@ -22,6 +22,9 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+// TTL in seconds, default 24 hours
+const REDIS_TTL = parseInt(process.env.REDIS_TTL_SECONDS || '86400', 10);
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -57,8 +60,8 @@ export default async function handler(
           }
         }
 
-        await redis.set(agentsKey, agents);
-        return res.status(200).json({ success: true, count: agents.length });
+        await redis.set(agentsKey, agents, { ex: REDIS_TTL });
+        return res.status(200).json({ success: true, count: agents.length, ttl: REDIS_TTL });
       } catch (error) {
         console.error('Redis POST error:', error);
         return res.status(500).json({ error: 'Failed to save agents' });
@@ -106,9 +109,9 @@ export default async function handler(
       }
 
       const agentsKey = `agents:${matchedUserId}`;
-      await redis.set(agentsKey, agents);
+      await redis.set(agentsKey, agents, { ex: REDIS_TTL });
 
-      return res.status(200).json({ success: true, count: agents.length, userId: matchedUserId });
+      return res.status(200).json({ success: true, count: agents.length, userId: matchedUserId, ttl: REDIS_TTL });
     } catch (error) {
       console.error('Redis agent upload error:', error);
       return res.status(500).json({ error: 'Failed to upload agents' });

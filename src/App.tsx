@@ -90,26 +90,66 @@ export default function App() {
   }, [user, isSignedIn]);
 
   // 加载 Agent 数据
+  const loadAgents = async () => {
+    if (!user || !isSignedIn) return;
+    try {
+      const res = await fetch('/api/agents', {
+        headers: { 'x-user-id': user.id },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setAgents(data);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load agents:', err);
+    }
+  };
+
+  // 初始化加载 agents
+  useEffect(() => {
+    loadAgents();
+  }, [user, isSignedIn]);
+
+  // SSE 连接用于实时监控 Agent 上传更新
   useEffect(() => {
     if (!user || !isSignedIn) return;
 
-    const loadAgents = async () => {
-      try {
-        const res = await fetch('/api/agents', {
-          headers: { 'x-user-id': user.id },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setAgents(data);
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+
+    const connectSSE = () => {
+      eventSource = new EventSource('/api/sse', {
+        headers: { 'x-user-id': user.id }
+      } as EventSourceInit);
+
+      eventSource.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('[SSE] Received event:', data);
+          if (data.action === 'agents_updated') {
+            // 重新加载 agents 数据
+            loadAgents();
           }
+        } catch (err) {
+          console.error('[SSE] Parse error:', err);
         }
-      } catch (err) {
-        console.error('Failed to load agents:', err);
-      }
+      };
+
+      eventSource.onerror = () => {
+        console.log('[SSE] Connection error, reconnecting in 5s...');
+        eventSource?.close();
+        reconnectTimeout = setTimeout(connectSSE, 5000);
+      };
     };
 
-    loadAgents();
+    connectSSE();
+
+    return () => {
+      eventSource?.close();
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    };
   }, [user, isSignedIn]);
 
   // 保存设置

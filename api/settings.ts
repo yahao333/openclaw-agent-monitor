@@ -14,6 +14,9 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+// TTL in seconds, default 24 hours
+const REDIS_TTL = parseInt(process.env.REDIS_TTL_SECONDS || '86400', 10);
+
 const DEFAULT_SETTINGS: Settings = {
   viewMode: 'aquarium',
   lang: 'en',
@@ -54,8 +57,8 @@ export default async function handler(
         return res.status(400).json({ error: 'Invalid settings' });
       }
 
-      // Upstash Redis auto-parses JSON, so store object directly (not JSON.stringify)
-      await redis.set(settingsKey, settings);
+      // Upstash Redis auto-parses JSON, store object directly with TTL
+      await redis.set(settingsKey, settings, { ex: REDIS_TTL });
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error('Redis POST error:', error);

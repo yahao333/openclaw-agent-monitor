@@ -24,6 +24,9 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+// TTL in seconds, default 24 hours (same as agents TTL)
+const REDIS_TTL = parseInt(process.env.REDIS_TTL_SECONDS || '86400', 10);
+
 // Get interval in hours from environment variable, default 24 (once per day)
 // For Vercel Hobby, cron runs once per day at most
 const CRON_INTERVAL_HOURS = parseInt(process.env.CRON_INTERVAL || '24', 10);
@@ -103,8 +106,9 @@ export default async function handler(
       nextRunAt
     };
 
-    // Save to Redis
-    await redis.set('stats:agents', stats);
+    // Save to Redis with TTL (stats expire faster if CRON_INTERVAL is shorter)
+    const statsTTL = Math.max(CRON_INTERVAL_HOURS * 3600, REDIS_TTL);
+    await redis.set('stats:agents', stats, { ex: statsTTL });
 
     console.log(`[cron] Stats saved: total=${totalAgents}, online=${onlineCount}, offline=${offlineCount}`);
 
