@@ -6,6 +6,7 @@ interface AgentData {
   name: { en: string; zh: string };
   status: 'online' | 'offline';
   lastActive: { en: string; zh: string };
+  lastActiveTimestamp: number;
   greeting: { en: string; zh: string };
 }
 
@@ -39,7 +40,13 @@ export default async function handler(
     if (req.method === 'GET') {
       try {
         const agents = await redis.get<AgentData[]>(agentsKey);
-        return res.status(200).json(agents || []);
+        // 添加 lastActiveTimestamp，用于前端判断离线（超过10分钟未上报视为离线）
+        const now = Date.now();
+        const agentsWithTimestamp = (agents || []).map(agent => ({
+          ...agent,
+          lastActiveTimestamp: agent.lastActiveTimestamp || now
+        }));
+        return res.status(200).json(agentsWithTimestamp);
       } catch (error) {
         console.error('Redis GET error:', error);
         return res.status(500).json({ error: 'Failed to fetch agents' });

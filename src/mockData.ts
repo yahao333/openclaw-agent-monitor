@@ -12,6 +12,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Alpha Scraper', zh: 'Alpha 抓取者' },
     status: 'online',
     lastActive: { en: 'Just now', zh: '刚刚' },
+    lastActiveTimestamp: Date.now() - 30 * 1000, // 30秒前
     greeting: { en: 'Hello world, I am ready to scrape!', zh: '你好世界，我准备好抓取了！' }
   },
   {
@@ -19,6 +20,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Beta Analyzer', zh: 'Beta 分析师' },
     status: 'online',
     lastActive: { en: '2 mins ago', zh: '2分钟前' },
+    lastActiveTimestamp: Date.now() - 2 * 60 * 1000, // 2分钟前
     greeting: { en: 'Data is beautiful.', zh: '数据如此美丽。' }
   },
   {
@@ -26,6 +28,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Gamma Sleeper', zh: 'Gamma 沉睡者' },
     status: 'offline',
     lastActive: { en: '3 hours ago', zh: '3小时前' },
+    lastActiveTimestamp: Date.now() - 3 * 60 * 60 * 1000, // 3小时前（超过10分钟，离线）
     greeting: { en: 'Going to sleep now...', zh: '我要去睡觉了...' }
   },
   {
@@ -33,6 +36,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Delta Monitor', zh: 'Delta 监控' },
     status: 'online',
     lastActive: { en: 'Just now', zh: '刚刚' },
+    lastActiveTimestamp: Date.now() - 10 * 1000, // 10秒前
     greeting: { en: 'All systems nominal.', zh: '所有系统运行正常。' }
   },
   {
@@ -40,6 +44,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Epsilon Backup', zh: 'Epsilon 备用' },
     status: 'offline',
     lastActive: { en: '2 days ago', zh: '2天前' },
+    lastActiveTimestamp: Date.now() - 2 * 24 * 60 * 60 * 1000, // 2天前（离线）
     greeting: { en: 'Standing by for backup.', zh: '随时准备替补。' }
   },
   {
@@ -47,6 +52,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Zeta Crawler', zh: 'Zeta 爬虫' },
     status: 'online',
     lastActive: { en: '1 min ago', zh: '1分钟前' },
+    lastActiveTimestamp: Date.now() - 60 * 1000, // 1分钟前
     greeting: { en: 'Crawling the web...', zh: '正在爬取网络...' }
   },
   {
@@ -54,6 +60,7 @@ export const MOCK_AGENTS: Agent[] = [
     name: { en: 'Eta DB Sync', zh: 'Eta 数据库同步' },
     status: 'offline',
     lastActive: { en: '5 hours ago', zh: '5小时前' },
+    lastActiveTimestamp: Date.now() - 5 * 60 * 60 * 1000, // 5小时前（离线）
     greeting: { en: 'Syncing databases...', zh: '正在同步数据库...' }
   }
 ];

@@ -6,6 +6,7 @@ interface AgentData {
   name: { en: string; zh: string };
   status: 'online' | 'offline';
   lastActive: { en: string; zh: string };
+  lastActiveTimestamp: number;
   greeting: { en: string; zh: string };
 }
 

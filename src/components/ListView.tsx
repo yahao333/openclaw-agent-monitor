@@ -38,7 +38,10 @@ export default function ListView({ agents, lang, searchQuery = '' }: ListViewPro
         </thead>
         <tbody className="divide-y divide-gray-100">
           {agents.map((agent) => {
-            const isOnline = agent.status === 'online';
+            const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000;
+            const isOnline = agent.lastActiveTimestamp
+              ? Date.now() - agent.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS
+              : agent.status === 'online';
             const matched = isMatched(agent);
 
             return (

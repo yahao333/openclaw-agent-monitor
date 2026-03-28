@@ -29,7 +29,10 @@ export default function GridView({ agents, lang, searchQuery = '' }: GridViewPro
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
       {agents.map((agent) => {
-        const isOnline = agent.status === 'online';
+        const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000;
+        const isOnline = agent.lastActiveTimestamp
+          ? Date.now() - agent.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS
+          : agent.status === 'online';
         const matched = isMatched(agent);
 
         return (
