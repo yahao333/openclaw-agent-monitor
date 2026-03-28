@@ -4,7 +4,7 @@ import { Redis } from '@upstash/redis';
 interface AgentData {
   id: string;
   name: { en: string; zh: string };
-  status: 'online' | 'offline';
+  status?: 'online' | 'offline';
   lastActive: { en: string; zh: string };
   lastActiveTimestamp: number;
   greeting: { en: string; zh: string };
@@ -62,7 +62,7 @@ export default async function handler(
         }
 
         for (const agent of agents) {
-          if (!agent.id || !agent.name || !agent.status) {
+          if (!agent.id || !agent.name) {
             return res.status(400).json({ error: 'Invalid agent data: missing required fields' });
           }
         }

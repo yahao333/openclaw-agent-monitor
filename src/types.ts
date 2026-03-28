@@ -12,7 +12,7 @@ export interface LocalizedString {
 export interface Agent {
   id: string;          // 唯一标识符 (例如: "agent-001")
   name: LocalizedString; // Agent 的名称 (支持中英文)
-  status: 'online' | 'offline'; // 状态：在线 或 离线
+  status?: 'online' | 'offline'; // 状态：在线 或 离线（已废弃，由前端根据 lastActiveTimestamp 判断）
   lastActive: LocalizedString;  // 最后活跃时间 (支持中英文)
   lastActiveTimestamp: number;   // 最后活跃时间戳 (Unix ms, 超过10分钟未更新视为离线)
   greeting: LocalizedString;   // 最后一次上线时的问候语

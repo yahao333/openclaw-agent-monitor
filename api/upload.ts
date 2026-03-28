@@ -95,9 +95,6 @@ export default async function handler(
       if (!agent.name || typeof agent.name !== 'object') {
         return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid name` });
       }
-      if (agent.status !== 'online' && agent.status !== 'offline') {
-        return res.status(400).json({ error: `Invalid agent at index ${i}: status must be "online" or "offline"` });
-      }
       if (!agent.lastActive || typeof agent.lastActive !== 'object') {
         return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid lastActive` });
       }

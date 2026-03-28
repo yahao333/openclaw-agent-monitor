@@ -4,7 +4,7 @@ import { Redis } from '@upstash/redis';
 interface AgentData {
   id: string;
   name: { en: string; zh: string };
-  status: 'online' | 'offline';
+  status?: 'online' | 'offline';
   lastActive: { en: string; zh: string };
   lastActiveTimestamp: number;
   greeting: { en: string; zh: string };
@@ -85,12 +85,15 @@ export default async function handler(
     let offlineCount = 0;
 
     // Count agents in each user's storage
+    const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000;
+    const now = Date.now();
     for (const key of agentKeys) {
       const agents = await redis.get<AgentData[]>(key);
       if (Array.isArray(agents)) {
         totalAgents += agents.length;
-        onlineCount += agents.filter(a => a.status === 'online').length;
-        offlineCount += agents.filter(a => a.status === 'offline').length;
+        // 根据 lastActiveTimestamp 判断在线/离线（超过10分钟未更新视为离线）
+        onlineCount += agents.filter(a => a.lastActiveTimestamp ? now - a.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS : a.status === 'online').length;
+        offlineCount += agents.filter(a => a.lastActiveTimestamp ? now - a.lastActiveTimestamp > OFFLINE_THRESHOLD_MS : a.status === 'offline').length;
       }
     }
 
