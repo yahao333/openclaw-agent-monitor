@@ -6,6 +6,7 @@
 import React, { useEffect } from 'react';
 import { Agent } from '../types';
 import { Language, t } from '../i18n';
+import { formatLastActive } from '../utils';
 
 interface ListViewProps {
   agents: Agent[];
@@ -67,7 +68,7 @@ export default function ListView({ agents, lang, searchQuery = '', offlineThresh
                   </span>
                 </td>
                 <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600 italic hidden sm:table-cell">"{agent.greeting[lang]}"</td>
-                <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600">{agent.lastActive[lang]}</td>
+                <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600">{formatLastActive(agent.lastActiveTimestamp, lang)}</td>
               </tr>
             );
           })}

@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { Agent } from '../types';
 import { Bot, Clock, MessageCircle } from 'lucide-react';
 import { Language, t } from '../i18n';
+import { formatLastActive } from '../utils';
 
 interface GridViewProps {
   agents: Agent[];
@@ -77,7 +78,7 @@ export default function GridView({ agents, lang, searchQuery = '', offlineThresh
               </div>
               <div className="flex items-center text-xs sm:text-sm text-gray-600">
                 <Clock size={14} className="mr-1.5 sm:mr-2 text-gray-400" />
-                <span>{t[lang].lastActive}: {agent.lastActive[lang]}</span>
+                <span>{t[lang].lastActive}: {formatLastActive(agent.lastActiveTimestamp, lang)}</span>
               </div>
             </div>
           </div>
