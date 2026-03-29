@@ -6,6 +6,7 @@ interface Settings {
   lang: 'en' | 'zh';
   showBubbles: boolean;
   token?: string;
+  offlineThresholdMinutes?: number;
 }
 
 // Initialize Redis client
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS: Settings = {
   lang: 'en',
   showBubbles: true,
   token: '',
+  offlineThresholdMinutes: 10,
 };
 
 export default async function handler(

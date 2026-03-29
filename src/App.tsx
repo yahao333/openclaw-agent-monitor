@@ -35,8 +35,8 @@ export default function App() {
   // 状态管理：控制是否显示水族箱的水泡，默认开启
   const [showBubbles, setShowBubbles] = useState(true);
 
-  // 状态管理：离线判定阈值（分钟），默认5分钟
-  const [offlineThresholdMinutes, setOfflineThresholdMinutes] = useState(5);
+  // 状态管理：离线判定阈值（分钟），默认10分钟
+  const [offlineThresholdMinutes, setOfflineThresholdMinutes] = useState(10);
 
   // 状态管理：搜索查询
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +82,7 @@ export default function App() {
           setLang(settings.lang || 'en');
           setShowBubbles(settings.showBubbles !== false);
           setAgentToken(settings.token || '');
-          setOfflineThresholdMinutes(settings.offlineThresholdMinutes || 5);
+          setOfflineThresholdMinutes(settings.offlineThresholdMinutes || 10);
         } else {
           console.error('[loadSettings] Failed to load settings:', res.status);
         }
