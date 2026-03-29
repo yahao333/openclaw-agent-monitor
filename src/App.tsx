@@ -312,8 +312,14 @@ export default function App() {
 
   // 计算在线和离线的数量，用于在顶部展示统计信息（根据 lastActiveTimestamp 判断，超过1分钟视为离线）
   const OFFLINE_THRESHOLD_MS = 60 * 1000;
+  const now = Date.now();
+  agents.forEach(a => {
+    const diff = a.lastActiveTimestamp ? now - a.lastActiveTimestamp : null;
+    const isOnline = diff !== null ? diff <= OFFLINE_THRESHOLD_MS : a.status === 'online';
+    console.debug(`[OfflineCheck] agent=${a.name.en || a.name.zh || a.id} lastActiveTimestamp=${a.lastActiveTimestamp} diff=${diff}ms threshold=${OFFLINE_THRESHOLD_MS}ms isOnline=${isOnline}`);
+  });
   const onlineCount = agents.filter(a =>
-    a.lastActiveTimestamp ? Date.now() - a.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS : a.status === 'online'
+    a.lastActiveTimestamp ? now - a.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS : a.status === 'online'
   ).length;
   const offlineCount = agents.length - onlineCount;
 

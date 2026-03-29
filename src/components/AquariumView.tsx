@@ -51,9 +51,10 @@ export default function AquariumView({ agents, lang, showBubbles, searchQuery = 
 function FishAgent({ agent, lang, searchQuery = '' }: { agent: Agent; lang: Language; searchQuery?: string }) {
   // 根据 lastActiveTimestamp 判断是否离线：超过1分钟未上报视为离线
   const OFFLINE_THRESHOLD_MS = 60 * 1000;
-  const isOnline = agent.lastActiveTimestamp
-    ? Date.now() - agent.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS
-    : agent.status === 'online';
+  const now = Date.now();
+  const diff = agent.lastActiveTimestamp ? now - agent.lastActiveTimestamp : null;
+  const isOnline = diff !== null ? diff <= OFFLINE_THRESHOLD_MS : agent.status === 'online';
+  console.debug(`[OfflineCheck] agent=${agent.name.en || agent.name.zh || agent.id} lastActiveTimestamp=${agent.lastActiveTimestamp} diff=${diff}ms threshold=${OFFLINE_THRESHOLD_MS}ms isOnline=${isOnline}`);
 
   // 检查是否匹配搜索
   const isMatched = () => {
