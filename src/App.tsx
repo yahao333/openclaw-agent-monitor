@@ -310,8 +310,8 @@ export default function App() {
     setLang(prev => prev === 'en' ? 'zh' : 'en');
   };
 
-  // 计算在线和离线的数量，用于在顶部展示统计信息（根据 lastActiveTimestamp 判断，超过10分钟视为离线）
-  const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000;
+  // 计算在线和离线的数量，用于在顶部展示统计信息（根据 lastActiveTimestamp 判断，超过1分钟视为离线）
+  const OFFLINE_THRESHOLD_MS = 60 * 1000;
   const onlineCount = agents.filter(a =>
     a.lastActiveTimestamp ? Date.now() - a.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS : a.status === 'online'
   ).length;

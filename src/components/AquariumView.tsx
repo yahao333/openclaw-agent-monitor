@@ -49,8 +49,8 @@ export default function AquariumView({ agents, lang, showBubbles, searchQuery = 
  * 内部组件：代表水族箱里的一条"鱼"（即一个 Agent）
  */
 function FishAgent({ agent, lang, searchQuery = '' }: { agent: Agent; lang: Language; searchQuery?: string }) {
-  // 根据 lastActiveTimestamp 判断是否离线：超过10分钟未上报视为离线
-  const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000;
+  // 根据 lastActiveTimestamp 判断是否离线：超过1分钟未上报视为离线
+  const OFFLINE_THRESHOLD_MS = 60 * 1000;
   const isOnline = agent.lastActiveTimestamp
     ? Date.now() - agent.lastActiveTimestamp <= OFFLINE_THRESHOLD_MS
     : agent.status === 'online';

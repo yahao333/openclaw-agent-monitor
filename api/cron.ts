@@ -85,7 +85,7 @@ export default async function handler(
     let offlineCount = 0;
 
     // Count agents in each user's storage
-    const OFFLINE_THRESHOLD_MS = 10 * 60 * 1000;
+    const OFFLINE_THRESHOLD_MS = 60 * 1000;
     const now = Date.now();
     for (const key of agentKeys) {
       const agents = await redis.get<AgentData[]>(key);
