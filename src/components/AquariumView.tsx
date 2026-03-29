@@ -8,6 +8,7 @@ import { motion } from 'motion/react';
 import { Bot, Moon, Wind } from 'lucide-react';
 import { Agent } from '../types';
 import { Language, t } from '../i18n';
+import { getAgentName } from '../utils';
 
 interface AquariumViewProps {
   agents: Agent[];
@@ -55,14 +56,14 @@ function FishAgent({ agent, lang, searchQuery = '', offlineThresholdMinutes }: {
   const now = Date.now();
   const diff = agent.lastActiveTimestamp ? now - agent.lastActiveTimestamp : null;
   const isOnline = diff !== null ? diff <= OFFLINE_THRESHOLD_MS : agent.status === 'online';
-  console.debug(`[OfflineCheck] agent=${agent.name.en || agent.name.zh || agent.id} lastActiveTimestamp=${agent.lastActiveTimestamp} diff=${diff}ms threshold=${OFFLINE_THRESHOLD_MS}ms isOnline=${isOnline}`);
+  console.debug(`[OfflineCheck] agent=${getAgentName(agent, lang)} lastActiveTimestamp=${agent.lastActiveTimestamp} diff=${diff}ms threshold=${OFFLINE_THRESHOLD_MS}ms isOnline=${isOnline}`);
 
   // 检查是否匹配搜索
   const isMatched = () => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
-    return agent.name.en.toLowerCase().includes(query) ||
-           agent.name.zh.includes(query);
+    const name = getAgentName(agent, lang);
+    return name.toLowerCase().includes(query);
   };
 
   const matched = isMatched();
@@ -109,7 +110,7 @@ function FishAgent({ agent, lang, searchQuery = '', offlineThresholdMinutes }: {
     // 如果离线或者正在避难中，则不触发
     if (!isOnline || isEvading) return;
     
-    console.log(`[调试信息] 💨 ${t[lang].debugEvade} ${agent.name[lang]}`);
+    console.log(`[调试信息] 💨 ${t[lang].debugEvade} ${getAgentName(agent, lang)}`);
     setIsEvading(true);
     
     // 生成一个新的安全目标点 (保证在水族箱内)
@@ -199,7 +200,7 @@ function FishAgent({ agent, lang, searchQuery = '', offlineThresholdMinutes }: {
       </div>
 
       {/* Agent 名称 */}
-      <span className="font-bold text-sm whitespace-nowrap">{agent.name[lang]}</span>
+      <span className="font-bold text-sm whitespace-nowrap">{getAgentName(agent, lang)}</span>
     </motion.div>
   );
 }

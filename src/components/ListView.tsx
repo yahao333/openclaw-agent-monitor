@@ -6,7 +6,7 @@
 import React, { useEffect } from 'react';
 import { Agent } from '../types';
 import { Language, t } from '../i18n';
-import { formatLastActive } from '../utils';
+import { formatLastActive, getAgentName } from '../utils';
 
 interface ListViewProps {
   agents: Agent[];
@@ -23,8 +23,8 @@ export default function ListView({ agents, lang, searchQuery = '', offlineThresh
   const isMatched = (agent: Agent) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
-    return agent.name.en.toLowerCase().includes(query) ||
-           agent.name.zh.includes(query);
+    const name = getAgentName(agent, lang);
+    return name.toLowerCase().includes(query);
   };
 
   return (
@@ -56,7 +56,7 @@ export default function ListView({ agents, lang, searchQuery = '', offlineThresh
               >
                 <td className="p-3 sm:p-4">
                   <div className={`font-medium text-sm sm:text-base ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
-                    {agent.name[lang]}
+                    {getAgentName(agent, lang)}
                   </div>
                   <div className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-none">{agent.id}</div>
                 </td>

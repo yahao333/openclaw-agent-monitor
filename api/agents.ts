@@ -3,10 +3,10 @@ import { Redis } from '@upstash/redis';
 
 interface AgentData {
   id: string;
-  name: { en: string; zh: string };
+  name?: { en: string; zh: string };
   status?: 'online' | 'offline';
   lastActive?: { en: string; zh: string };
-  lastActiveTimestamp: number;
+  lastActiveTimestamp?: number;
   greeting?: { en: string; zh: string };
 }
 
@@ -62,8 +62,11 @@ export default async function handler(
         }
 
         for (const agent of agents) {
-          if (!agent.id || !agent.name) {
+          if (!agent.id) {
             return res.status(400).json({ error: 'Invalid agent data: missing required fields' });
+          }
+          if (!agent.name || typeof agent.name !== 'object') {
+            agent.name = { en: agent.id, zh: agent.id };
           }
         }
 
@@ -110,8 +113,11 @@ export default async function handler(
       }
 
       for (const agent of agents) {
-        if (!agent.id || !agent.name || !agent.status) {
+        if (!agent.id) {
           return res.status(400).json({ error: 'Invalid agent data: missing required fields' });
+        }
+        if (!agent.name || typeof agent.name !== 'object') {
+          agent.name = { en: agent.id, zh: agent.id };
         }
       }
 

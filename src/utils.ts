@@ -1,4 +1,12 @@
 import { Language } from './i18n';
+import { Agent } from './types';
+
+/**
+ * 安全获取 Agent 名称，缺失时回退到 id
+ */
+export function getAgentName(agent: Agent, lang: Language): string {
+  return agent.name?.[lang] || agent.name?.en || agent.id;
+}
 
 /**
  * 将 lastActiveTimestamp 转换为相对时间字符串

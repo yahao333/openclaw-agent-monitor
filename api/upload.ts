@@ -3,9 +3,10 @@ import { Redis } from '@upstash/redis';
 
 interface AgentData {
   id: string;
-  name: { en: string; zh: string };
-  status: 'online' | 'offline';
-  lastActive: { en: string; zh: string };
+  name?: { en: string; zh: string };
+  status?: 'online' | 'offline';
+  lastActive?: { en: string; zh: string };
+  lastActiveTimestamp?: number;
   greeting?: { en: string; zh: string };
 }
 
@@ -86,14 +87,15 @@ export default async function handler(
       return res.status(400).json({ error: 'Invalid data: array cannot be empty' });
     }
 
-    // Validate each agent has required fields
+    // Validate each agent has required fields, and normalize name from id if missing
     for (let i = 0; i < agents.length; i++) {
       const agent = agents[i];
       if (!agent.id || typeof agent.id !== 'string') {
         return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid id` });
       }
+      // Normalize: if name is missing, use id as name
       if (!agent.name || typeof agent.name !== 'object') {
-        return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid name` });
+        agent.name = { en: agent.id, zh: agent.id };
       }
     }
 

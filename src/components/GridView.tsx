@@ -7,7 +7,7 @@ import React, { useEffect } from 'react';
 import { Agent } from '../types';
 import { Bot, Clock, MessageCircle } from 'lucide-react';
 import { Language, t } from '../i18n';
-import { formatLastActive } from '../utils';
+import { formatLastActive, getAgentName } from '../utils';
 
 interface GridViewProps {
   agents: Agent[];
@@ -24,8 +24,8 @@ export default function GridView({ agents, lang, searchQuery = '', offlineThresh
   const isMatched = (agent: Agent) => {
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
-    return agent.name.en.toLowerCase().includes(query) ||
-           agent.name.zh.includes(query);
+    const name = getAgentName(agent, lang);
+    return name.toLowerCase().includes(query);
   };
 
   return (
@@ -66,7 +66,7 @@ export default function GridView({ agents, lang, searchQuery = '', offlineThresh
             {/* 中间：名称 */}
             <div className="mb-3 sm:mb-4">
               <h3 className={`text-base sm:text-lg font-bold ${matched && searchQuery.trim() ? 'text-blue-700' : 'text-gray-900'}`}>
-                {agent.name[lang]}
+                {getAgentName(agent, lang)}
               </h3>
             </div>
 
