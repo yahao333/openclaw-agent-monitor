@@ -12,9 +12,10 @@ interface GridViewProps {
   agents: Agent[];
   lang: Language;
   searchQuery?: string;
+  offlineThresholdMinutes: number;
 }
 
-export default function GridView({ agents, lang, searchQuery = '' }: GridViewProps) {
+export default function GridView({ agents, lang, searchQuery = '', offlineThresholdMinutes }: GridViewProps) {
   useEffect(() => {
     console.log('[调试信息] 📱 网格视图已挂载');
   }, []);
@@ -29,7 +30,7 @@ export default function GridView({ agents, lang, searchQuery = '' }: GridViewPro
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
       {agents.map((agent) => {
-        const OFFLINE_THRESHOLD_MS = 60 * 1000;
+        const OFFLINE_THRESHOLD_MS = offlineThresholdMinutes * 60 * 1000;
         const now = Date.now();
         const diff = agent.lastActiveTimestamp ? now - agent.lastActiveTimestamp : null;
         const isOnline = diff !== null ? diff <= OFFLINE_THRESHOLD_MS : agent.status === 'online';

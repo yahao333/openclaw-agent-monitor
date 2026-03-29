@@ -11,9 +11,10 @@ interface ListViewProps {
   agents: Agent[];
   lang: Language;
   searchQuery?: string;
+  offlineThresholdMinutes: number;
 }
 
-export default function ListView({ agents, lang, searchQuery = '' }: ListViewProps) {
+export default function ListView({ agents, lang, searchQuery = '', offlineThresholdMinutes }: ListViewProps) {
   useEffect(() => {
     console.log('[调试信息] 📝 列表视图已挂载');
   }, []);
@@ -38,7 +39,7 @@ export default function ListView({ agents, lang, searchQuery = '' }: ListViewPro
         </thead>
         <tbody className="divide-y divide-gray-100">
           {agents.map((agent) => {
-            const OFFLINE_THRESHOLD_MS = 60 * 1000;
+            const OFFLINE_THRESHOLD_MS = offlineThresholdMinutes * 60 * 1000;
             const now = Date.now();
             const diff = agent.lastActiveTimestamp ? now - agent.lastActiveTimestamp : null;
             const isOnline = diff !== null ? diff <= OFFLINE_THRESHOLD_MS : agent.status === 'online';

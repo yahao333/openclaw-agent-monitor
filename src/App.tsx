@@ -35,6 +35,9 @@ export default function App() {
   // 状态管理：控制是否显示水族箱的水泡，默认开启
   const [showBubbles, setShowBubbles] = useState(true);
 
+  // 状态管理：离线判定阈值（分钟），默认5分钟
+  const [offlineThresholdMinutes, setOfflineThresholdMinutes] = useState(5);
+
   // 状态管理：搜索查询
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -79,6 +82,7 @@ export default function App() {
           setLang(settings.lang || 'en');
           setShowBubbles(settings.showBubbles !== false);
           setAgentToken(settings.token || '');
+          setOfflineThresholdMinutes(settings.offlineThresholdMinutes || 5);
         } else {
           console.error('[loadSettings] Failed to load settings:', res.status);
         }
@@ -159,7 +163,7 @@ export default function App() {
 
     setIsSaving(true);
     try {
-      const payload = { viewMode, lang, showBubbles, token: agentToken };
+      const payload = { viewMode, lang, showBubbles, token: agentToken, offlineThresholdMinutes };
       console.log('[saveSettings] Saving settings for user:', user.id, payload);
       const res = await fetch('/api/settings', {
         method: 'POST',
@@ -310,8 +314,8 @@ export default function App() {
     setLang(prev => prev === 'en' ? 'zh' : 'en');
   };
 
-  // 计算在线和离线的数量，用于在顶部展示统计信息（根据 lastActiveTimestamp 判断，超过1分钟视为离线）
-  const OFFLINE_THRESHOLD_MS = 60 * 1000;
+  // 计算在线和离线的数量，用于在顶部展示统计信息（根据 lastActiveTimestamp 判断，超过指定分钟视为离线）
+  const OFFLINE_THRESHOLD_MS = offlineThresholdMinutes * 60 * 1000;
   const now = Date.now();
   agents.forEach(a => {
     const diff = a.lastActiveTimestamp ? now - a.lastActiveTimestamp : null;
@@ -424,9 +428,9 @@ export default function App() {
 
         {/* 主体内容区域：根据 viewMode 状态渲染不同的组件 */}
         <main className="transition-all duration-300 ease-in-out">
-          {viewMode === 'aquarium' && <AquariumView agents={agents} lang={lang} showBubbles={showBubbles} searchQuery={searchQuery} />}
-          {viewMode === 'grid' && <GridView agents={agents} lang={lang} searchQuery={searchQuery} />}
-          {viewMode === 'list' && <ListView agents={agents} lang={lang} searchQuery={searchQuery} />}
+          {viewMode === 'aquarium' && <AquariumView agents={agents} lang={lang} showBubbles={showBubbles} searchQuery={searchQuery} offlineThresholdMinutes={offlineThresholdMinutes} />}
+          {viewMode === 'grid' && <GridView agents={agents} lang={lang} searchQuery={searchQuery} offlineThresholdMinutes={offlineThresholdMinutes} />}
+          {viewMode === 'list' && <ListView agents={agents} lang={lang} searchQuery={searchQuery} offlineThresholdMinutes={offlineThresholdMinutes} />}
         </main>
 
         {/* 底部提示信息 */}
@@ -537,6 +541,25 @@ export default function App() {
                     }`}
                   />
                 </button>
+              </div>
+
+              {/* 离线阈值设置 */}
+              <div className="pt-6 border-t border-gray-100 space-y-2">
+                <label className="text-sm font-semibold text-gray-900">{t[lang].offlineThreshold}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="1"
+                    max="60"
+                    value={offlineThresholdMinutes}
+                    onChange={(e) => setOfflineThresholdMinutes(Number(e.target.value))}
+                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                  />
+                  <span className="text-sm font-medium text-gray-700 w-20 text-right">
+                    {offlineThresholdMinutes} {t[lang].minutes}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400">{t[lang].offlineThresholdHint}</p>
               </div>
 
               {/* Token 字段 */}

@@ -12,11 +12,12 @@ import { Language, t } from '../i18n';
 interface AquariumViewProps {
   agents: Agent[];
   lang: Language;
-  showBubbles: boolean; // 新增：是否显示水泡的控制开关
+  showBubbles: boolean;
   searchQuery?: string;
+  offlineThresholdMinutes: number;
 }
 
-export default function AquariumView({ agents, lang, showBubbles, searchQuery = '' }: AquariumViewProps) {
+export default function AquariumView({ agents, lang, showBubbles, searchQuery = '', offlineThresholdMinutes }: AquariumViewProps) {
   // 调试信息：当组件渲染时，在控制台打印日志
   useEffect(() => {
     console.log(`[调试信息] 🌊 水族箱视图已挂载，当前接收到的 Agent 数量: ${agents.length}，是否显示水泡: ${showBubbles}`);
@@ -32,7 +33,7 @@ export default function AquariumView({ agents, lang, showBubbles, searchQuery = 
 
       {/* 遍历所有的 Agent，为每个 Agent 渲染一个"鱼" */}
       {agents.map((agent) => (
-        <FishAgent key={agent.id} agent={agent} lang={lang} searchQuery={searchQuery} />
+        <FishAgent key={agent.id} agent={agent} lang={lang} searchQuery={searchQuery} offlineThresholdMinutes={offlineThresholdMinutes} />
       ))}
 
       {/* 左下角的状态提示 - 移动端隐藏 */}
@@ -48,9 +49,9 @@ export default function AquariumView({ agents, lang, showBubbles, searchQuery = 
 /**
  * 内部组件：代表水族箱里的一条"鱼"（即一个 Agent）
  */
-function FishAgent({ agent, lang, searchQuery = '' }: { agent: Agent; lang: Language; searchQuery?: string }) {
-  // 根据 lastActiveTimestamp 判断是否离线：超过1分钟未上报视为离线
-  const OFFLINE_THRESHOLD_MS = 60 * 1000;
+function FishAgent({ agent, lang, searchQuery = '', offlineThresholdMinutes }: { agent: Agent; lang: Language; searchQuery?: string; offlineThresholdMinutes: number }) {
+  // 根据 lastActiveTimestamp 判断是否离线：超过指定分钟未上报视为离线
+  const OFFLINE_THRESHOLD_MS = offlineThresholdMinutes * 60 * 1000;
   const now = Date.now();
   const diff = agent.lastActiveTimestamp ? now - agent.lastActiveTimestamp : null;
   const isOnline = diff !== null ? diff <= OFFLINE_THRESHOLD_MS : agent.status === 'online';
