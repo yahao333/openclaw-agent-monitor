@@ -12,7 +12,10 @@ export function getAgentName(agent: Agent, lang: Language): string {
  * 将 lastActiveTimestamp 转换为相对时间字符串
  * 例如: "2 mins ago" / "2分钟前"
  */
-export function formatLastActive(lastActiveTimestamp: number, lang: Language): string {
+export function formatLastActive(lastActiveTimestamp: number | undefined, lang: Language): string {
+  if (!lastActiveTimestamp) {
+    return lang === 'zh' ? '刚刚' : 'Just now';
+  }
   const diff = Date.now() - lastActiveTimestamp;
 
   if (diff < 0) {

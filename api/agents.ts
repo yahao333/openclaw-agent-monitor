@@ -68,6 +68,9 @@ export default async function handler(
           if (!agent.name || typeof agent.name !== 'object') {
             agent.name = { en: agent.id, zh: agent.id };
           }
+          if (!agent.lastActiveTimestamp) {
+            agent.lastActiveTimestamp = Date.now();
+          }
         }
 
         await redis.set(agentsKey, agents, { ex: REDIS_TTL });
@@ -118,6 +121,9 @@ export default async function handler(
         }
         if (!agent.name || typeof agent.name !== 'object') {
           agent.name = { en: agent.id, zh: agent.id };
+        }
+        if (!agent.lastActiveTimestamp) {
+          agent.lastActiveTimestamp = Date.now();
         }
       }
 

@@ -97,6 +97,10 @@ export default async function handler(
       if (!agent.name || typeof agent.name !== 'object') {
         agent.name = { en: agent.id, zh: agent.id };
       }
+      // Normalize: if lastActiveTimestamp is missing, use current server time
+      if (!agent.lastActiveTimestamp) {
+        agent.lastActiveTimestamp = Date.now();
+      }
     }
 
     // Save agents to the matched user's storage with TTL

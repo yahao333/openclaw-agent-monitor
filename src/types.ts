@@ -14,6 +14,6 @@ export interface Agent {
   name?: LocalizedString; // Agent 的名称 (支持中英文)，可选，缺失时使用 id
   status?: 'online' | 'offline'; // 状态：在线 或 离线（已废弃，由前端根据 lastActiveTimestamp 判断）
   lastActive?: LocalizedString;  // 最后活跃时间 (已废弃，由 lastActiveTimestamp 实时计算)
-  lastActiveTimestamp: number;   // 最后活跃时间戳 (Unix ms)
+  lastActiveTimestamp?: number;   // 最后活跃时间戳 (Unix ms)，可选，未传时后端会用当前时间填充
   greeting?: LocalizedString;   // 最后一次上线时的问候语（可选）
 }
