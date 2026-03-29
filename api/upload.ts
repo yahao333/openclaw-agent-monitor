@@ -6,7 +6,7 @@ interface AgentData {
   name: { en: string; zh: string };
   status: 'online' | 'offline';
   lastActive: { en: string; zh: string };
-  greeting: { en: string; zh: string };
+  greeting?: { en: string; zh: string };
 }
 
 interface Settings {
@@ -94,12 +94,6 @@ export default async function handler(
       }
       if (!agent.name || typeof agent.name !== 'object') {
         return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid name` });
-      }
-      if (!agent.lastActive || typeof agent.lastActive !== 'object') {
-        return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid lastActive` });
-      }
-      if (!agent.greeting || typeof agent.greeting !== 'object') {
-        return res.status(400).json({ error: `Invalid agent at index ${i}: missing or invalid greeting` });
       }
     }
 

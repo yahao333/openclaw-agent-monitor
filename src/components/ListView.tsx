@@ -67,7 +67,7 @@ export default function ListView({ agents, lang, searchQuery = '', offlineThresh
                     {isOnline ? `🟢 ${t[lang].online}` : `⚪ ${t[lang].offline}`}
                   </span>
                 </td>
-                <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600 italic hidden sm:table-cell">"{agent.greeting[lang]}"</td>
+                <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600 italic hidden sm:table-cell">{agent.greeting ? `"${agent.greeting[lang] || agent.greeting.en}"` : '—'}</td>
                 <td className="p-3 sm:p-4 text-xs sm:text-sm text-gray-600">{formatLastActive(agent.lastActiveTimestamp, lang)}</td>
               </tr>
             );

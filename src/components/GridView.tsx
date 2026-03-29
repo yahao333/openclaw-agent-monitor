@@ -72,10 +72,12 @@ export default function GridView({ agents, lang, searchQuery = '', offlineThresh
 
             {/* 底部：详细信息（问候语和最后活跃时间） */}
             <div className="space-y-2 border-t pt-3 sm:pt-4">
+              {agent.greeting && (
               <div className="flex items-start text-xs sm:text-sm text-gray-600">
                 <MessageCircle size={14} className="mr-1.5 sm:mr-2 mt-0.5 text-gray-400 shrink-0" />
-                <span className="italic line-clamp-2">"{agent.greeting[lang]}"</span>
+                <span className="italic line-clamp-2">"{agent.greeting[lang] || agent.greeting.en}"</span>
               </div>
+              )}
               <div className="flex items-center text-xs sm:text-sm text-gray-600">
                 <Clock size={14} className="mr-1.5 sm:mr-2 text-gray-400" />
                 <span>{t[lang].lastActive}: {formatLastActive(agent.lastActiveTimestamp, lang)}</span>
