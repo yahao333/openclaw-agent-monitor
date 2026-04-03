@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Redis } from '@upstash/redis';
+import { findUserIdByAgentToken } from './clerkClient';
 
 interface AgentData {
   id: string;
@@ -89,18 +90,18 @@ export default async function handler(
     }
 
     try {
-      // Find the userId that has this token registered in settings
-      // Scan all settings keys to find matching token
-      // Note: In production, you might want to maintain a reverse index (token -> userId)
-      const settingsKeys = await redis.keys('settings:*');
+      // First try: Find user by token in Clerk publicMetadata (authoritative source)
+      let matchedUserId = await findUserIdByAgentToken(token);
 
-      let matchedUserId: string | null = null;
-      for (const settingsKey of settingsKeys) {
-        const settings = await redis.get<Settings>(settingsKey);
-        if (settings && settings.token === token) {
-          // Extract userId from settings key (format: "settings:{userId}")
-          matchedUserId = settingsKey.replace('settings:', '');
-          break;
+      // Fallback: Scan Redis settings keys for backward compatibility
+      if (!matchedUserId) {
+        const settingsKeys = await redis.keys('settings:*');
+        for (const settingsKey of settingsKeys) {
+          const settings = await redis.get<Settings>(settingsKey);
+          if (settings && settings.token === token) {
+            matchedUserId = settingsKey.replace('settings:', '');
+            break;
+          }
         }
       }
 

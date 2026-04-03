@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Redis } from '@upstash/redis';
+import { updateUserAgentToken } from './clerkClient';
 
 interface Settings {
   viewMode: 'aquarium' | 'grid' | 'list';
@@ -61,6 +62,12 @@ export default async function handler(
 
       // Upstash Redis auto-parses JSON, store object directly with TTL
       await redis.set(settingsKey, settings, { ex: REDIS_TTL });
+
+      // Also save token to Clerk publicMetadata for permanent storage
+      if (settings.token) {
+        await updateUserAgentToken(userId, settings.token);
+      }
+
       return res.status(200).json({ success: true });
     } catch (error) {
       console.error('Redis POST error:', error);
