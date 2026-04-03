@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Redis } from '@upstash/redis';
-import { findUserIdByAgentToken } from './clerkClient';
+import { createClerkClient } from '@clerk/clerk-sdk-node';
 
 interface AgentData {
   id: string;
@@ -26,6 +26,33 @@ const redis = new Redis({
 
 // TTL in seconds, default 24 hours
 const REDIS_TTL = parseInt(process.env.REDIS_TTL_SECONDS || '86400', 10);
+
+// Lazy-load Clerk client
+let _clerkClient: ReturnType<typeof createClerkClient> | null = null;
+
+function getClerkClient() {
+  if (!process.env.CLERK_SECRET_KEY) return null;
+  if (!_clerkClient) {
+    _clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  }
+  return _clerkClient;
+}
+
+async function findUserIdByAgentToken(token: string): Promise<string | null> {
+  const clerk = getClerkClient();
+  if (!clerk) return null;
+  try {
+    const response = await clerk.users.getUserList({ limit: 100 });
+    for (const user of response.data) {
+      const agentToken = user.publicMetadata?.agentToken as string | undefined;
+      if (agentToken === token) return user.id;
+    }
+    return null;
+  } catch (error) {
+    console.error('[Clerk] Error finding user by token:', error);
+    return null;
+  }
+}
 
 /**
  * External upload endpoint for agents to upload JSON data.

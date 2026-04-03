@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Redis } from '@upstash/redis';
-import { updateUserAgentToken } from './clerkClient';
+import { createClerkClient } from '@clerk/clerk-sdk-node';
 
 interface Settings {
   viewMode: 'aquarium' | 'grid' | 'list';
@@ -18,6 +18,34 @@ const redis = new Redis({
 
 // TTL in seconds, default 24 hours
 const REDIS_TTL = parseInt(process.env.REDIS_TTL_SECONDS || '86400', 10);
+
+// Lazy-load Clerk client
+let _clerkClient: ReturnType<typeof createClerkClient> | null = null;
+
+function getClerkClient() {
+  if (!process.env.CLERK_SECRET_KEY) return null;
+  if (!_clerkClient) {
+    _clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+  }
+  return _clerkClient;
+}
+
+async function updateUserAgentToken(userId: string, token: string): Promise<boolean> {
+  const clerk = getClerkClient();
+  if (!clerk) {
+    console.warn('[Clerk] CLERK_SECRET_KEY not configured, skipping Clerk update');
+    return false;
+  }
+  try {
+    await clerk.users.updateUserMetadata(userId, {
+      publicMetadata: { agentToken: token },
+    });
+    return true;
+  } catch (error) {
+    console.error('[Clerk] Error updating user metadata:', error);
+    return false;
+  }
+}
 
 const DEFAULT_SETTINGS: Settings = {
   viewMode: 'aquarium',
