@@ -27,11 +27,11 @@ export async function findUserIdByAgentToken(token: string): Promise<string | nu
   }
 
   try {
-    const users = await clerk.users.getUserList({
+    const response = await clerk.users.getUserList({
       limit: 100,
     });
 
-    for (const user of users) {
+    for (const user of response.data) {
       const agentToken = user.publicMetadata?.agentToken as string | undefined;
       if (agentToken === token) {
         return user.id;
