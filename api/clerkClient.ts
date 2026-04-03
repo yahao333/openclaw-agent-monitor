@@ -1,18 +1,33 @@
 import { createClerkClient } from '@clerk/clerk-sdk-node';
 
-// Server-side Clerk client for backend API calls
-export const clerkClient = createClerkClient({
-  secretKey: process.env.CLERK_SECRET_KEY,
-});
+// Lazy-load Clerk client to avoid initialization errors when CLERK_SECRET_KEY is not set
+let _clerkClient: ReturnType<typeof createClerkClient> | null = null;
+
+function getClerkClient() {
+  if (!process.env.CLERK_SECRET_KEY) {
+    return null;
+  }
+  if (!_clerkClient) {
+    _clerkClient = createClerkClient({
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
+  }
+  return _clerkClient;
+}
 
 // Find user ID by agent token stored in publicMetadata
 export async function findUserIdByAgentToken(token: string): Promise<string | null> {
-  if (!token || !process.env.CLERK_SECRET_KEY) {
+  if (!token) {
+    return null;
+  }
+
+  const clerk = getClerkClient();
+  if (!clerk) {
     return null;
   }
 
   try {
-    const users = await clerkClient.users.getUserList({
+    const users = await clerk.users.getUserList({
       limit: 100,
     });
 
@@ -32,13 +47,14 @@ export async function findUserIdByAgentToken(token: string): Promise<string | nu
 
 // Update user's agent token in publicMetadata
 export async function updateUserAgentToken(userId: string, token: string): Promise<boolean> {
-  if (!process.env.CLERK_SECRET_KEY) {
+  const clerk = getClerkClient();
+  if (!clerk) {
     console.warn('[Clerk] CLERK_SECRET_KEY not configured, skipping Clerk update');
     return false;
   }
 
   try {
-    await clerkClient.users.updateUserMetadata(userId, {
+    await clerk.users.updateUserMetadata(userId, {
       publicMetadata: {
         agentToken: token,
       },
